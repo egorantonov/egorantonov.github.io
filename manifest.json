@@ -1,6 +1,6 @@
 {
-  "short_name": "Phase Flow",
-  "name": "Phase Flow",
+  "short_name": "Kyber",
+  "name": "Kyber",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#2a343d",
   "background_color": "#ffffff"
 }
