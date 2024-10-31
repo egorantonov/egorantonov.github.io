@@ -1,0 +1,148 @@
+<html>
+<head>
+  <title>GORZDRAV</title>
+  <meta charset="utf-8"/>
+  <style>
+.root {
+  display: flex;
+  align-items: center;
+}
+  </style>
+</head>
+<body onload="initialize()">
+  <div id="root">
+    <div id="newPatient">
+      <form onsubmit="return onPatientSubmit(event)">
+        <label for="patientFirstName">Имя</label>
+        <input required type="text" id="firstName" />
+        <label for="patientLastName">Фамилия</label>
+        <input required type="text" id="lastName" />
+        <label for="patientBirthDate">Дата рождения</label>
+        <input required type="date" id="birthDate" />
+        <label for="patientFirstName">Полис ОМС</label>
+        <input required type="number" id="insuranceNumber" />
+        <input type="submit"  title="Добавить"/>
+      </form>
+    </div>
+    <div id="patients">
+
+    </div>
+    <div id="selectedPatient">
+
+    </div>
+    <div id="lpus">
+
+    </div>
+  </div>
+</body>
+<script async type="text/javascript">
+const CONSTANTS = {
+  patients: 'patients',
+  selectedPatient: 'selectedPatient'
+}
+
+function initialize() {
+  renderPatients()
+}
+
+function renderPatients() {
+  const patientsNode = document.getElementById(CONSTANTS.patients)
+  patientsNode.innerHTML = ''
+  const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
+  const raw = patients.map(p => renderPatient(p)).join('')
+  patientsNode.insertAdjacentHTML('beforeend', raw)
+}
+
+function renderPatient(p) {
+  return `<div style="border: 1px solid #7777" id="patient_${p.insuranceNumber}"
+            data-insuranceNumber="${p.insuranceNumber}"
+            data-lastName="${p.lastName}"
+            data-firstName="${p.firstName}"
+            data-birthDate="${p.birthDate}"
+            onclick="setActivePatient(event)">
+            <p>Пациент: ${p.lastName} ${p.firstName}</p>
+            <p>${p.birthDate}</p>
+            <p>${p.insuranceNumber}</p>
+            <!-- TODO: add delete patient -->
+          </div>`
+}
+
+async function getLPUs(insuranceNumber) {
+  const lpus = await fetch(`https://gorzdrav.spb.ru/_api/api/v2/oms/attachment/lpus?polisN=${insuranceNumber}`)
+    .then(r => r.json())
+    .then(json => json.result ?? [])
+    .catch(error => {
+      console.log(error)
+      alert(`Ошибка запроса: ${error.message}`)
+    })
+
+  const raw = lpus.map(lpu => renderLPU(lpu)).join('')
+  document.getElementById('lpus').insertAdjacentHTML('beforeend', raw)
+}
+
+function renderLPU(lpu) {
+  const phoneLink = `tel: +7${lpu.phone.replaceAll(/\(|\)|-| /g, '')}`
+  const emailLink = `mailto: ${lpu.email}`
+  // const encodedName = encodeURIComponent(`${x.lpuFullName} ${x.districtName} район`.replaceAll('"', ''))
+  const encodedAddress = encodeURIComponent(`${lpu.address} ${lpu.districtName} район`?.replaceAll('"', ''))
+
+  return `
+<div>
+  <div>
+    <span><b>${lpu.lpuFullName}</b></span>
+  </div>
+  <div>
+    <a href={'https://yandex.ru/maps/2/saint-petersburg/search/${encodedAddress}/?z=19'}
+      target="_blank" rel="noreferrer">
+      <span>📍 ${lpu.address}</span>
+    </a>
+  </div>
+  <div>
+    <a href=${phoneLink}> 📞 +7 ${lpu.phone}</a>
+    <a href=${emailLink}> 📧 ${lpu.email}</a>
+  </div>
+</div>
+  `
+}
+
+async function setActivePatient(event) {
+  event.stopPropagation()
+  const patient = event.target?.dataset
+
+  localStorage.setItem(CONSTANTS.selectedPatient, patient.insurancenumber)
+  const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
+  selectedPatientNode.innerText = `Выбранный пациент: ${patient.lastname} ${patient.firstname}`
+  getLPUs(patient.insurancenumber)
+}
+
+async function onPatientSubmit(event) {
+  event.preventDefault()
+  const form = event.target
+
+  localStorage.setItem(CONSTANTS.selectedPatient, form.insuranceNumber.value)
+  const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
+  selectedPatientNode.innerText = `Выбранный пациент: ${form.lastName.value} ${form.firstName.value}`
+  getLPUs(form.insuranceNumber.value)
+
+  const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
+  const existing = patients.find(p => p.insuranceNumber == form.insuranceNumber.value)
+  if (existing) {
+    existing.lastName = form.lastName.value,
+    existing.firstName = form.firstName.value,
+    existing.birthDate = form.birthDate.value
+  }
+  else {
+    patients.push({
+      insuranceNumber: form.insuranceNumber.value,
+      lastName: form.lastName.value,
+      firstName: form.firstName.value,
+      birthDate: form.birthDate.value
+    })
+  }
+  localStorage.setItem(CONSTANTS.patients, JSON.stringify(patients))
+  renderPatients()
+
+  return false
+}
+</script>
+</html>
