@@ -1,33 +1,213 @@
 <html>
 <head>
-  <title>GORZDRAV</title>
+  <link rel="preconnect" href="https://gorzdrav.spb.ru">
+  <link rel="icon" href="https://gorzdrav.spb.ru/images/r78/favicon.ico">
+  <link rel="canonical" href="https://egorantonov.github.io/gorzdrav" data-rh="true">
+  <meta name="og:url" property="og:url" content="https://egorantonov.github.io/gorzdrav" data-rh="true">
+  <meta name="og:title" property="og:title" content="Горздрав" data-rh="true">
+  <meta name="twitter:title" content="Горздрав" data-rh="true">
   <meta charset="utf-8"/>
+  <title>ГОРЗДРАВ</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Сервис записи в поликлиники Санкт-Петербурга по полису ОМС">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
   <style>
-.root {
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serifArial, Helvetica, sans-serif;
+  overflow-y: scroll;
+}
+
+p {
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: #08f;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button, input[type="submit"] {
+  appearance: button;
+  border-radius: 6px;
+  border: 0px none transparent;
+  height: 32px;
+  color: #fff;
+  background-color: #00AA8A;
+  padding-left: 25px;
+  padding-right: 25px;
+  text-transform: uppercase;
+}
+
+button:hover {
+  background-color: #009b7e;
+}
+
+#root {
+  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
 }
+
+#root>div {
+  margin-top: 10px;
+}
+
+#newPatient {
+  width: 100%;
+}
+
+form {
+  margin: 0;
+}
+
+.error {
+  color: #c00;
+}
+
+#newPatient_form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#newPatient_form>div {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+  align-items: baseline;
+}
+
+#newPatient_form>div>label {
+  min-width: 40%;
+}
+
+#newPatient_form>div>input {
+  width: 100%;
+  height: 32px;
+}
+
+#newPatient_form>div>input[type=submit] {
+  margin-top: 10px;
+}
+
+#patients {
+  width: 100%;
+}
+
+#selectedPatient {
+  position: sticky;
+  top: 0px;
+  width: 100%;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  padding: 10px 0;
+  margin-bottom: 0;
+  background: linear-gradient(90deg, #fff, #fffa, #fff);
+}
+
+.patient {
+  display: flex;
+  border: 1px solid #7777;
+  border-radius: 5px;
+  overflow: hidden;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.patient:hover {
+  border-color: #777;
+}
+
+.patient_info {
+  padding: 0;
+  margin: 0;
+  background-color: #eee;
+  width: 85%;
+  padding: 10px;
+}
+
+.patient_info:hover {
+  background-color: #fafafa;
+}
+
+.patient_remove {
+  width: 15%;
+  background-color: #f99;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient_remove:hover {
+  background-color: #f33;
+}
+
+.lpu {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #7777;
+  background-color: #eee;
+  margin-bottom: 10px;
+}
+
+.lpu_name, .lpu_address, .lpu_contacts {
+  margin-bottom: 10px;
+}
+
+.lpu_address, .lpu_contacts {
+  font-size: small;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.lpu_select_button {
+  width: 100%;
+}
+
   </style>
 </head>
 <body onload="initialize()">
   <div id="root">
     <div id="newPatient">
-      <form onsubmit="return onPatientSubmit(event)">
-        <label for="patientFirstName">Имя</label>
-        <input required type="text" id="firstName" />
-        <label for="patientLastName">Фамилия</label>
-        <input required type="text" id="lastName" />
-        <label for="patientBirthDate">Дата рождения</label>
-        <input required type="date" id="birthDate" />
-        <label for="patientFirstName">Полис ОМС</label>
-        <input required type="number" id="insuranceNumber" />
-        <input type="submit"  title="Добавить"/>
+      <form id="newPatient_form" onsubmit="return onPatientSubmit(event)">
+        <div>
+          <label for="patientFirstName">Имя</label>
+          <input required type="text" id="firstName" />
+        </div>
+        <div>
+          <label for="patientLastName">Фамилия</label>
+          <input required type="text" id="lastName" />
+        </div>
+        <div>
+          <label for="patientBirthDate">Дата рождения</label>
+          <input required type="date" id="birthDate" />
+        </div>
+        <div>
+          <label for="patientFirstName">Полис ОМС</label>
+          <input required type="number" id="insuranceNumber" />
+        </div>
+        <div>
+          <input type="submit"  title="Добавить"/>
+        </div>
       </form>
     </div>
     <div id="patients">
 
     </div>
-    <div id="selectedPatient">
+    <div id="selectedPatient" onclick="document.getElementById('patients').scrollIntoView()">
 
     </div>
     <div id="lpus">
@@ -36,7 +216,12 @@
   </div>
 </body>
 <script async type="text/javascript">
+const host = 'https://gorzdrav.spb.ru' 
+const api_v2 = '/_api/api/v2' 
 const CONSTANTS = {
+  API: {
+    lpus: `${host}${api_v2}/oms/attachment/lpus`
+  },
   patients: 'patients',
   selectedPatient: 'selectedPatient'
 }
@@ -54,75 +239,125 @@ function renderPatients() {
 }
 
 function renderPatient(p) {
-  return `<div style="border: 1px solid #7777" id="patient_${p.insuranceNumber}"
-            data-insuranceNumber="${p.insuranceNumber}"
-            data-lastName="${p.lastName}"
-            data-firstName="${p.firstName}"
-            data-birthDate="${p.birthDate}"
-            onclick="setActivePatient(event)">
-            <p>Пациент: ${p.lastName} ${p.firstName}</p>
-            <p>${p.birthDate}</p>
-            <p>${p.insuranceNumber}</p>
-            <!-- TODO: add delete patient -->
+  return `<div class="patient" id="patient_${p.insuranceNumber}">
+            <div class="patient_info" onclick="setActivePatient('${p.insuranceNumber}','${p.lastName}','${p.firstName}','${p.birthDate}')">
+              <div class="patient_info_text">
+                <p>Пациент: ${p.lastName} ${p.firstName} [${p.birthDate}]</p>
+                <p>Полис: ${p.insuranceNumber}</p>
+              </div>
+            </div>
+            <div class="patient_remove" onclick="removePatient('${p.insuranceNumber}')">
+              <span>✕</span>
+            </div>
           </div>`
 }
 
 async function getLPUs(insuranceNumber) {
-  const lpus = await fetch(`https://gorzdrav.spb.ru/_api/api/v2/oms/attachment/lpus?polisN=${insuranceNumber}`)
+  const container = document.getElementById('lpus')
+  container.innerHTML = ''
+  if (!insuranceNumber) {
+    container.insertAdjacentHTML(
+      'beforeend', 
+      `<span class="error">Ошибка: у пациента отсутствует номер полиса ОМС, введите данные заново</span>`
+    )
+    return
+  }
+  const lpus = await fetch(`${CONSTANTS.API.lpus}?polisN=${insuranceNumber}`)
     .then(r => r.json())
-    .then(json => json.result ?? [])
+    .then(json => {
+      if (json.success && json.result && Array.isArray(json.result)) {
+        const lpus = json.result
+        const raw = lpus.map(lpu => renderLPU(lpu)).join('')
+        container.insertAdjacentHTML('beforeend', raw)
+      }
+      else if (!json.success) {
+        container.insertAdjacentHTML(
+          'beforeend', 
+          `<span class="error">Ошибка: ${json.message ? json.message : 'Сервис вернул ошибку без сообщения'}</span>`
+        )
+      }
+      else {
+        container.insertAdjacentHTML(
+          'beforeend', 
+          `<span class="error">Неизвестная ошибка: смотри консоль</span>`
+        )
+      }
+    })
     .catch(error => {
       console.log(error)
       alert(`Ошибка запроса: ${error.message}`)
+      container.insertAdjacentHTML(
+        'beforeend', 
+        `<span class="error">Ошибка выполнения запроса: смотри консоль</span>`
+      )
     })
-
-  const raw = lpus.map(lpu => renderLPU(lpu)).join('')
-  document.getElementById('lpus').insertAdjacentHTML('beforeend', raw)
+  document.getElementById(CONSTANTS.selectedPatient).scrollIntoView()
 }
 
 function renderLPU(lpu) {
   const phoneLink = `tel: +7${lpu.phone.replaceAll(/\(|\)|-| /g, '')}`
   const emailLink = `mailto: ${lpu.email}`
   // const encodedName = encodeURIComponent(`${x.lpuFullName} ${x.districtName} район`.replaceAll('"', ''))
-  const encodedAddress = encodeURIComponent(`${lpu.address} ${lpu.districtName} район`?.replaceAll('"', ''))
+  const encodedAddress = lpu.address 
+    ? encodeURIComponent(`${lpu.address} ${lpu.districtName} район`?.replaceAll('"', ''))
+    : ''
 
   return `
-<div>
-  <div>
+<div class="lpu">
+  <div class="lpu_name">
     <span><b>${lpu.lpuFullName}</b></span>
   </div>
-  <div>
-    <a href={'https://yandex.ru/maps/2/saint-petersburg/search/${encodedAddress}/?z=19'}
+  <div class="lpu_address">
+    ${lpu.address ? `<a href="https://yandex.ru/maps/2/saint-petersburg/search/${encodedAddress}/?z=19"
       target="_blank" rel="noreferrer">
       <span>📍 ${lpu.address}</span>
-    </a>
+    </a>` : ''}
   </div>
-  <div>
+  <div class="lpu_contacts">
     <a href=${phoneLink}> 📞 +7 ${lpu.phone}</a>
     <a href=${emailLink}> 📧 ${lpu.email}</a>
+  </div>
+  <div class="lpu_select">
+    <button class="lpu_select_button" onclick="">Выбрать</button>
   </div>
 </div>
   `
 }
 
-async function setActivePatient(event) {
-  event.stopPropagation()
-  const patient = event.target?.dataset
-
-  localStorage.setItem(CONSTANTS.selectedPatient, patient.insurancenumber)
+async function setActivePatient(insuranceNumber, lastName, firstName, birthDate) {
+  localStorage.setItem(CONSTANTS.selectedPatient, insuranceNumber)
   const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
-  selectedPatientNode.innerText = `Выбранный пациент: ${patient.lastname} ${patient.firstname}`
-  getLPUs(patient.insurancenumber)
+  selectedPatientNode.innerText = `Выбранный пациент: ${lastName} ${firstName}`
+  getLPUs(insuranceNumber)
+}
+
+async function removePatient(insuranceNumber) {
+  debugger
+  const selectedPatient = localStorage.getItem(CONSTANTS.selectedPatient)
+  if (selectedPatient == insuranceNumber) {
+    const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
+    selectedPatientNode.innerText = ''
+  }
+  const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
+  const patient = patients.find(p => p.insuranceNumber == insuranceNumber)
+  patients.splice((patients.indexOf(patient)), 1)
+  localStorage.setItem(CONSTANTS.patients, JSON.stringify(patients))
+
+  // clear
+  renderPatients()
+  getLPUs()
 }
 
 async function onPatientSubmit(event) {
   event.preventDefault()
   const form = event.target
 
-  localStorage.setItem(CONSTANTS.selectedPatient, form.insuranceNumber.value)
-  const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
-  selectedPatientNode.innerText = `Выбранный пациент: ${form.lastName.value} ${form.firstName.value}`
-  getLPUs(form.insuranceNumber.value)
+  const insuranceNumber = event.target.insuranceNumber.value
+  const lastName = event.target.lastName.value
+  const firstName = event.target.firstName.value
+  const birthDate = event.target.birthDate.value
+
+  setActivePatient(insuranceNumber, lastName, firstName, birthDate)
 
   const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
   const existing = patients.find(p => p.insuranceNumber == form.insuranceNumber.value)
