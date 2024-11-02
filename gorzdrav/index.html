@@ -42,6 +42,7 @@ button, input[type="submit"] {
   padding-left: 25px;
   padding-right: 25px;
   text-transform: uppercase;
+  cursor: pointer;
 }
 
 button:hover {
@@ -57,6 +58,61 @@ button:hover {
 
 #root>div {
   margin-top: 10px;
+}
+
+.popup {
+  z-index: 3;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: 0 !important;
+  background-color: #fff3;
+  backdrop-filter: blur(10px);
+  border: none !important;
+  border-radius: 0;
+  box-sizing: border-box;
+  height: 100%;
+  max-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+.popup_container {
+  background: #fff;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.popup_header {
+  position: fixed;
+  top: 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  height: 48px;
+}
+
+.popup_back {
+  width: 48px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.popup_back:hover {
+  color: #009b7e;
+}
+
+.popup_content {
+  margin: 48px 10px 0;
+  height: calc(100% - 48px);
+  overflow-y: scroll;
+}
+
+.hidden {
+  display: none !important;
 }
 
 #newPatient {
@@ -177,6 +233,34 @@ form {
   width: 100%;
 }
 
+.specialty, 
+.doctor {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #7777;
+  background-color: #eee;
+  margin-bottom: 10px;
+}
+
+.specialty_name, .specialty_tickets,
+.doctor_name, .doctor_tickets {
+  margin-bottom: 10px;
+}
+
+.specialty_tickets,
+.doctor_tickets {
+  font-size: small;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.specialty_select_button,
+.doctor_select_button {
+  width: 100%;
+}
+
   </style>
 </head>
 <body onload="initialize()">
@@ -207,10 +291,52 @@ form {
     <div id="patients">
 
     </div>
-    <div id="selectedPatient" onclick="document.getElementById('patients').scrollIntoView()">
+    <div class="popups">
 
-    </div>
-    <div id="lpus">
+      <div id="lpus" class="popup hidden">
+        <div class="popup_container">
+
+          <div class="popup_header">
+            <div class="popup_back">🡠</div>
+            <div class="popup_title">Выбор медорганизации</div>
+          </div>
+
+          <div class="popup_content" id="lpus_list">
+          </div>
+        </div>
+      </div>
+
+      <div id="specialties" class="popup hidden">
+
+        <div class="popup_container">
+
+          <div class="popup_header">
+            <div class="popup_back">🡠</div>
+            <div class="popup_title">Выбор специальности</div>
+          </div>
+
+          <div class="popup_content" id="specialties_list">
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="doctors" class="popup hidden">
+
+        <div class="popup_container">
+
+          <div class="popup_header">
+            <div class="popup_back">🡠</div>
+            <div class="popup_title">Выбор специальности</div>
+          </div>
+
+          <div class="popup_content" id="doctors_list">
+          </div>
+
+        </div>
+
+      </div>
 
     </div>
   </div>
@@ -220,7 +346,10 @@ const host = 'https://gorzdrav.spb.ru'
 const api_v2 = '/_api/api/v2' 
 const CONSTANTS = {
   API: {
-    lpus: `${host}${api_v2}/oms/attachment/lpus`
+    lpus: `${host}${api_v2}/oms/attachment/lpus?polisN={insuranceNumber}`,
+    specialties: `${host}${api_v2}/schedule/lpu/{lpuId}/specialties`,
+    doctors: `${host}${api_v2}/schedule/lpu/{lpuId}/speciality/{specialtyId}/doctors`,
+    appointments: `${host}${api_v2}/schedule/lpu/{lpuId}/doctor/{doctorId}/appointments`
   },
   patients: 'patients',
   selectedPatient: 'selectedPatient'
@@ -252,46 +381,63 @@ function renderPatient(p) {
           </div>`
 }
 
-async function getLPUs(insuranceNumber) {
-  const container = document.getElementById('lpus')
+async function getData({
+  view,
+  entity,
+  renderFunction,
+  endpoint,
+  parameter1,
+  parameter1Name,
+  parameter1EmptyMessage,
+  parameter2,
+  parameter2Name,
+  parameter2EmptyMessage,
+}) {
+  const popup = document.getElementById(view)
+  popup.classList.remove('hidden')
+  const container = document.getElementById(`${view}_list`)
   container.innerHTML = ''
-  if (!insuranceNumber) {
-    container.insertAdjacentHTML(
-      'beforeend', 
-      `<span class="error">Ошибка: у пациента отсутствует номер полиса ОМС, введите данные заново</span>`
-    )
+
+  const withMessage = (text, noerror = false) => `
+    <div class="${entity}">
+        <div class="${entity}_name">
+          <span class="${noerror ? '' : 'error'}">${text}</span>
+        </div>
+    </div>`
+
+  if (!parameter1) {
+    let message = parameter1EmptyMessage
+    if (!parameter2 && parameter2Name) message += `\r\n${parameter2EmptyMessage}`
+    UpdateContent(container, withMessage(message))
     return
   }
-  const lpus = await fetch(`${CONSTANTS.API.lpus}?polisN=${insuranceNumber}`)
+
+  UpdateContent(container, withMessage('Загрузка...', true))
+
+  await fetch(endpoint.replace(`${parameter1Name}`, parameter1).replace(`${parameter2Name}`, parameter2))
     .then(r => r.json())
     .then(json => {
       if (json.success && json.result && Array.isArray(json.result)) {
-        const lpus = json.result
-        const raw = lpus.map(lpu => renderLPU(lpu)).join('')
-        container.insertAdjacentHTML('beforeend', raw)
+        const result = json.result
+        const raw = result.map(e => renderFunction(e, parameter1)).join('')
+        UpdateContent(container, raw)
       }
       else if (!json.success) {
-        container.insertAdjacentHTML(
-          'beforeend', 
-          `<span class="error">Ошибка: ${json.message ? json.message : 'Сервис вернул ошибку без сообщения'}</span>`
-        )
+        container.innerHTML = ''
+        UpdateContent(container, withMessage(`Ошибка: ${json.message ? json.message : 'Сервис вернул ошибку без сообщения'}`))
       }
       else {
-        container.insertAdjacentHTML(
-          'beforeend', 
-          `<span class="error">Неизвестная ошибка: смотри консоль</span>`
+        UpdateContent(container, withMessage(`Неизвестная ошибка, смотри консоль.`)
         )
       }
     })
     .catch(error => {
       console.log(error)
       alert(`Ошибка запроса: ${error.message}`)
-      container.insertAdjacentHTML(
-        'beforeend', 
-        `<span class="error">Ошибка выполнения запроса: смотри консоль</span>`
+      UpdateContent(container, withMessage(`Ошибка выполнения запроса: смотри консоль.`)
       )
     })
-  document.getElementById(CONSTANTS.selectedPatient).scrollIntoView()
+
 }
 
 function renderLPU(lpu) {
@@ -318,7 +464,7 @@ function renderLPU(lpu) {
     <a href=${emailLink}> 📧 ${lpu.email}</a>
   </div>
   <div class="lpu_select">
-    <button class="lpu_select_button" onclick="">Выбрать</button>
+    <button class="lpu_select_button" onclick="getSpecialties('${lpu.id}')">Выбрать</button>
   </div>
 </div>
   `
@@ -327,17 +473,30 @@ function renderLPU(lpu) {
 async function setActivePatient(insuranceNumber, lastName, firstName, birthDate) {
   localStorage.setItem(CONSTANTS.selectedPatient, insuranceNumber)
   const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
-  selectedPatientNode.innerText = `Выбранный пациент: ${lastName} ${firstName}`
-  getLPUs(insuranceNumber)
+  // selectedPatientNode.innerText = `Выбранный пациент: ${lastName} ${firstName}`
+
+  const request = {
+    view: 'lpus',
+    entity: 'lpu',
+    renderFunction: renderLPU,
+    endpoint: CONSTANTS.API.lpus,
+    parameter1: insuranceNumber,
+    parameter1Name: '{insuranceNumber}',
+    parameter1EmptyMessage: 'Ошибка: не передан полис ОМС пациента',
+    parameter2: '',
+    parameter2Name: '',
+    parameter2EmptyMessage: '',
+  }
+  getData(request)
 }
 
 async function removePatient(insuranceNumber) {
   debugger
   const selectedPatient = localStorage.getItem(CONSTANTS.selectedPatient)
-  if (selectedPatient == insuranceNumber) {
-    const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
-    selectedPatientNode.innerText = ''
-  }
+  // if (selectedPatient == insuranceNumber) {
+  //   const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
+  //   selectedPatientNode.innerText = ''
+  // }
   const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
   const patient = patients.find(p => p.insuranceNumber == insuranceNumber)
   patients.splice((patients.indexOf(patient)), 1)
@@ -345,7 +504,6 @@ async function removePatient(insuranceNumber) {
 
   // clear
   renderPatients()
-  getLPUs()
 }
 
 async function onPatientSubmit(event) {
@@ -379,5 +537,73 @@ async function onPatientSubmit(event) {
 
   return false
 }
+
+async function getSpecialties(lpuId) {
+
+  const request = {
+    view: 'specialties',
+    entity: 'specialty',
+    renderFunction: renderSpecialty,
+    endpoint: CONSTANTS.API.specialties,
+    parameter1: lpuId,
+    parameter1Name: '{lpuId}',
+    parameter1EmptyMessage: 'Ошибка: не передан идентификатор организации',
+    parameter2: '',
+    parameter2Name: '',
+    parameter2EmptyMessage: '',
+  }
+  getData(request)
+  return
+}
+
+function renderSpecialty(specialty, lpuId) {
+  return `
+<div class="specialty">
+  <div class="specialty_name">${specialty.name}</div>
+  <div class="specialty_tickets">${specialty.countFreeParticipant ? `Талонов: ${specialty.countFreeParticipant}` : ''}</div>
+  <button class="specialty_select_button" onclick="getDoctors('${lpuId}','${specialty.id}')">Выбрать</button>
+</div>`
+}
+
+async function getDoctors(lpuId, specialtyId) {
+  const request = {
+    view: 'doctors',
+    entity: 'doctor',
+    renderFunction: renderDoctor,
+    endpoint: CONSTANTS.API.doctors,
+    parameter1: lpuId,
+    parameter1Name: '{lpuId}',
+    parameter1EmptyMessage: 'Ошибка: не передан идентификатор организации',
+    parameter2: specialtyId,
+    parameter2Name: '{specialtyId}',
+    parameter2EmptyMessage: 'Ошибка: не передан идентификатор врача',
+  }
+  getData(request)
+  return
+}
+
+function renderDoctor(doctor) {
+  return `
+<div class="doctor">
+  <div class="doctor_name">${doctor.name}</div>
+  <div class="doctor_tickets">${doctor.freeParticipantCount ? `Талонов: ${doctor.freeParticipantCount}` : ''}</div>
+  <button class="doctor_select_button" onclick="">Выбрать</button>
+</div>`
+}
+
+const backButtons = Array.from(document.querySelectorAll('.popup_back'))
+for (let i = 0; i < backButtons.length; i++) {
+  const back = backButtons[i];
+  back.addEventListener('click', (e) => {
+    const parentPopup = e.target.closest('.popup')
+    parentPopup.classList.add('hidden')
+  })
+}
+
+function UpdateContent(element, content, position = 'beforeend') {
+  element.innerHTML = ''
+  element.insertAdjacentHTML(position, content)
+}
+
 </script>
 </html>
