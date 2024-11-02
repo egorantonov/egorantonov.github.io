@@ -1,6 +1,6 @@
 {
-  "short_name": "Phase Flow",
-  "name": "Phase Flow",
+  "short_name": "Egor Antonov",
+  "name": "Egor Antonov",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,8 +18,11 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "https://egorantonov.github.io/gorzdrav/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "scope": "https://egorantonov.github.io/",
+  "lang": "ru"
 }
