@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="light">
   <style>
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serifArial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto-Condensed, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serifArial, Helvetica, sans-serif;
   overflow-y: scroll;
 }
 
@@ -60,14 +60,43 @@ button:hover {
   margin-top: 10px;
 }
 
+#header {
+  width: 100%;
+}
+
+#header>div {
+  height: 64px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#header h3 {
+  text-transform: uppercase;
+  color: #009b7e;
+  font-weight: 200;
+  margin: 0 16px;
+}
+
+#header p {
+  color: #777;
+  font-size: smaller;
+  text-align: center;
+}
+
+#header div img {
+  height: 32px;
+  width: 32px;
+  margin: 0 16px;
+}
+
 .popup {
   z-index: 3;
   position: absolute;
   top: 0;
   left: 0;
   margin-top: 0 !important;
-  background-color: #fff3;
-  backdrop-filter: blur(10px);
   border: none !important;
   border-radius: 0;
   box-sizing: border-box;
@@ -79,6 +108,11 @@ button:hover {
   padding: 0px;
 }
 
+.popup#lpus {
+  background-color: #ccc3;
+  backdrop-filter: blur(10px);
+}
+
 .popup_container {
   background: #fff;
   max-width: 500px;
@@ -86,24 +120,45 @@ button:hover {
 }
 
 .popup_header {
+  max-width: 500px;
+  width: 100%;
+  height: 48px;
   position: fixed;
   top: 0px;
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
-  height: 48px;
+  background-color: #fff;
 }
 
 .popup_back {
   width: 48px;
   text-align: center;
   cursor: pointer;
-  transform: scale(-1, 1);
+  font-size: 24px;
+  /* transform: scale(-1, 1); */
+  transform: rotate(180deg);
 }
 
-.popup_back:hover {
+.popup_back::before {
+  content: '➔';
+}
+
+.popup_back:hover, .popup_menu:hover {
   color: #009b7e;
+}
+
+.popup_title {
+  font-weight: 600;
+}
+
+.popup_menu {
+  width: 48px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .popup_content {
@@ -210,44 +265,17 @@ form {
   background-color: #f33;
 }
 
-.lpu {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #7777;
-  background-color: #eee;
-  margin-bottom: 10px;
-}
-
-.lpu_name, .lpu_address, .lpu_contacts {
-  margin-bottom: 10px;
-}
-
-.lpu_address, .lpu_contacts {
-  font-size: small;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.lpu_select_button {
-  width: 100%;
-}
-
+.lpu,
 .specialty, 
 .doctor {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #7777;
-  background-color: #eee;
+  background-color: #f6f6f6;
   margin-bottom: 10px;
 }
 
-.specialty_name, .specialty_tickets,
-.doctor_name, .doctor_tickets {
-  margin-bottom: 10px;
-}
-
+.lpu_address, .lpu_contacts,
 .specialty_tickets,
 .doctor_tickets {
   font-size: small;
@@ -257,6 +285,13 @@ form {
   justify-content: space-between;
 }
 
+.lpu_name, .lpu_address, .lpu_contacts,
+.specialty_name, .specialty_tickets,
+.doctor_name, .doctor_tickets {
+  margin-bottom: 10px;
+}
+
+.lpu_select_button,
 .specialty_select_button,
 .doctor_select_button {
   width: 100%;
@@ -266,6 +301,13 @@ form {
 </head>
 <body onload="initialize()">
   <div id="root">
+    <header id="header">
+      <div >
+        <img style="height: 32px;" src="https://gorzdrav.spb.ru/images/r78/favicon.ico" />  
+        <h3>Горздрав | Санкт-Петербург</h3>
+      </div>
+      <p>Сервис записи в поликлиники Санкт-Петербурга</p>
+    </header>
     <div id="newPatient">
       <form id="newPatient_form" onsubmit="return onPatientSubmit(event)">
         <div>
@@ -298,8 +340,9 @@ form {
         <div class="popup_container">
 
           <div class="popup_header">
-            <div class="popup_back">➔</div>
+            <div class="popup_back"></div>
             <div class="popup_title">Выбор медорганизации</div>
+            <div class="popup_menu"></div>
           </div>
 
           <div class="popup_content" id="lpus_list">
@@ -312,8 +355,9 @@ form {
         <div class="popup_container">
 
           <div class="popup_header">
-            <div class="popup_back">➔</div>
+            <div class="popup_back"></div>
             <div class="popup_title">Выбор специальности</div>
+            <div class="popup_menu">⁝</div>
           </div>
 
           <div class="popup_content" id="specialties_list">
@@ -328,8 +372,9 @@ form {
         <div class="popup_container">
 
           <div class="popup_header">
-            <div class="popup_back">➔</div>
+            <div class="popup_back"></div>
             <div class="popup_title">Выбор врача</div>
+            <div class="popup_menu"></div>
           </div>
 
           <div class="popup_content" id="doctors_list">
