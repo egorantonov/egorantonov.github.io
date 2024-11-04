@@ -3,6 +3,7 @@
   <link rel="preconnect" href="https://gorzdrav.spb.ru">
   <link rel="icon" href="https://gorzdrav.spb.ru/images/r78/favicon.ico">
   <link rel="canonical" href="https://egorantonov.github.io/gorzdrav" data-rh="true">
+  <link rel="stylesheet" href="/styles.min.css">
   <meta name="og:url" property="og:url" content="https://egorantonov.github.io/gorzdrav" data-rh="true">
   <meta name="og:title" property="og:title" content="Горздрав" data-rh="true">
   <meta name="twitter:title" content="Горздрав" data-rh="true">
@@ -12,292 +13,6 @@
   <meta name="description" content="Сервис записи в поликлиники Санкт-Петербурга по полису ОМС">
   <meta name="theme-color" content="#ffffff">
   <meta name="color-scheme" content="light">
-  <style>
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto-Condensed, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serifArial, Helvetica, sans-serif;
-  overflow-y: scroll;
-}
-
-p {
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: #08f;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-button, input[type="submit"] {
-  appearance: button;
-  border-radius: 6px;
-  border: 0px none transparent;
-  height: 32px;
-  color: #fff;
-  background-color: #00AA8A;
-  padding-left: 25px;
-  padding-right: 25px;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #009b7e;
-}
-
-#root {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#root>div {
-  margin-top: 10px;
-}
-
-#header {
-  width: 100%;
-}
-
-#header>div {
-  height: 64px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
-
-#header h3 {
-  text-transform: uppercase;
-  color: #009b7e;
-  font-weight: 200;
-  margin: 0 16px;
-}
-
-#header p {
-  color: #777;
-  font-size: smaller;
-  text-align: center;
-}
-
-#header div img {
-  height: 32px;
-  width: 32px;
-  margin: 0 16px;
-}
-
-.popup {
-  z-index: 3;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin-top: 0 !important;
-  border: none !important;
-  border-radius: 0;
-  box-sizing: border-box;
-  height: 100%;
-  max-height: 100%;
-  width: 100%;
-  max-width: 100%;
-  margin: 0px;
-  padding: 0px;
-}
-
-.popup#lpus {
-  background-color: #ccc3;
-  backdrop-filter: blur(10px);
-}
-
-.popup_container {
-  background: #fff;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.popup_header {
-  max-width: 500px;
-  width: 100%;
-  height: 48px;
-  position: fixed;
-  top: 0px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff;
-}
-
-.popup_back {
-  width: 48px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 24px;
-  /* transform: scale(-1, 1); */
-  transform: rotate(180deg);
-}
-
-.popup_back::before {
-  content: '➔';
-}
-
-.popup_back:hover, .popup_menu:hover {
-  color: #009b7e;
-}
-
-.popup_title {
-  font-weight: 600;
-}
-
-.popup_menu {
-  width: 48px;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.popup_content {
-  margin: 48px 10px 0;
-  height: calc(100% - 48px);
-  overflow-y: scroll;
-}
-
-.hidden {
-  display: none !important;
-}
-
-#newPatient {
-  width: 100%;
-}
-
-form {
-  margin: 0;
-}
-
-.error {
-  color: #c00;
-}
-
-#newPatient_form {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-#newPatient_form>div {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 10px;
-  align-items: baseline;
-}
-
-#newPatient_form>div>label {
-  min-width: 40%;
-}
-
-#newPatient_form>div>input {
-  width: 100%;
-  height: 32px;
-}
-
-#newPatient_form>div>input[type=submit] {
-  margin-top: 10px;
-}
-
-#patients {
-  width: 100%;
-}
-
-#selectedPatient {
-  position: sticky;
-  top: 0px;
-  width: 100%;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  padding: 10px 0;
-  margin-bottom: 0;
-  background: linear-gradient(90deg, #fff, #fffa, #fff);
-}
-
-.patient {
-  display: flex;
-  border: 1px solid #7777;
-  border-radius: 5px;
-  overflow: hidden;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
-.patient:hover {
-  border-color: #777;
-}
-
-.patient_info {
-  padding: 0;
-  margin: 0;
-  background-color: #eee;
-  width: 85%;
-  padding: 10px;
-}
-
-.patient_info:hover {
-  background-color: #fafafa;
-}
-
-.patient_remove {
-  width: 15%;
-  background-color: #f99;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.patient_remove:hover {
-  background-color: #f33;
-}
-
-.lpu,
-.specialty, 
-.doctor {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #7777;
-  background-color: #f6f6f6;
-  margin-bottom: 10px;
-}
-
-.lpu_address, .lpu_contacts,
-.specialty_tickets,
-.doctor_tickets {
-  font-size: small;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.lpu_name, .lpu_address, .lpu_contacts,
-.specialty_name, .specialty_tickets,
-.doctor_name, .doctor_tickets {
-  margin-bottom: 10px;
-}
-
-.lpu_select_button,
-.specialty_select_button,
-.doctor_select_button {
-  width: 100%;
-}
-
-  </style>
 </head>
 <body onload="initialize()">
   <div id="root">
@@ -327,7 +42,7 @@ form {
           <input required type="number" id="insuranceNumber" />
         </div>
         <div>
-          <input type="submit"  title="Добавить"/>
+          <input type="submit" value="Добавить"/>
         </div>
       </form>
     </div>
@@ -357,10 +72,36 @@ form {
           <div class="popup_header">
             <div class="popup_back"></div>
             <div class="popup_title">Выбор специальности</div>
-            <div class="popup_menu">⁝</div>
+            <div class="popup_menu"><!--⁝--></div>
           </div>
 
-          <div class="popup_content" id="specialties_list">
+          <div class="popup_content">
+            <div id="lpu_appointments"></div>
+            <div id="lpu_appointments_list">
+              <!-- <div class="lpu_appointment">
+                <div class="lpu_appointment_visit">
+                  <div class="lpu_appointment_visit_date">13.11.2024</div>
+                  <div class="lpu_appointment_visit_time">10:40</div>
+                </div>
+                <div class="lpu_appointment_data">
+                  <div class="lpu_appointment_specialty">Эндокринология</div>
+                  <div class="lpu_appointment_doctor">Устюжанина Анна Олеговна</div>
+                  <div class="lpu_appointment_lpu">"ПОЛИС" Медицинский центр (Среднерогатская)</div>
+                  <div class="lpu_appointment_address">г. Санкт-Петербург, ул. Среднерогатская, 13, кор. 1, стр. 1</div>
+                  <div class="lpu_appointment_phone">(812) 670-00-03</div>
+                </div>
+                <div class="lpu_appointment_patient">
+                  <div class="lpu_appointment_patient_name">Антонова Наталья</div>
+                  <div class="lpu_appointment_patient_birthday">04.08.1970</div>
+                </div>
+                <div style="padding: 0 10px 10px">
+                  <button class="lpu_appointment_cancel_button">Отменить</button>
+                </div>
+              </div> -->
+            </div>
+            <div id="specialties_list">
+
+            </div>
           </div>
 
         </div>
@@ -384,272 +125,21 @@ form {
 
       </div>
 
+      <div id="appointments" class="popup hidden">
+        <div class="popup_container">
+          <div class="popup_header">
+            <div class="popup_back"></div>
+            <div class="popup_title">Выбор талона</div>
+            <div class="popup_menu"></div>
+          </div>
+
+          <div class="popup_content" id="appointments_list">
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </body>
-<script async type="text/javascript">
-const host = 'https://gorzdrav.spb.ru' 
-const api_v2 = '/_api/api/v2' 
-const CONSTANTS = {
-  API: {
-    lpus: `${host}${api_v2}/oms/attachment/lpus?polisN={insuranceNumber}`,
-    specialties: `${host}${api_v2}/schedule/lpu/{lpuId}/specialties`,
-    doctors: `${host}${api_v2}/schedule/lpu/{lpuId}/speciality/{specialtyId}/doctors`,
-    appointments: `${host}${api_v2}/schedule/lpu/{lpuId}/doctor/{doctorId}/appointments`
-  },
-  patients: 'patients',
-  selectedPatient: 'selectedPatient'
-}
-
-function initialize() {
-  renderPatients()
-}
-
-function renderPatients() {
-  const patientsNode = document.getElementById(CONSTANTS.patients)
-  patientsNode.innerHTML = ''
-  const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
-  const raw = patients.map(p => renderPatient(p)).join('')
-  patientsNode.insertAdjacentHTML('beforeend', raw)
-}
-
-function renderPatient(p) {
-  return `<div class="patient" id="patient_${p.insuranceNumber}">
-            <div class="patient_info" onclick="setActivePatient('${p.insuranceNumber}','${p.lastName}','${p.firstName}','${p.birthDate}')">
-              <div class="patient_info_text">
-                <p>Пациент: ${p.lastName} ${p.firstName} [${p.birthDate}]</p>
-                <p>Полис: ${p.insuranceNumber}</p>
-              </div>
-            </div>
-            <div class="patient_remove" onclick="removePatient('${p.insuranceNumber}')">
-              <span>✕</span>
-            </div>
-          </div>`
-}
-
-async function getData({
-  view,
-  entity,
-  renderFunction,
-  endpoint,
-  parameter1,
-  parameter1Name,
-  parameter1EmptyMessage,
-  parameter2,
-  parameter2Name,
-  parameter2EmptyMessage,
-}) {
-  const popup = document.getElementById(view)
-  popup.classList.remove('hidden')
-  const container = document.getElementById(`${view}_list`)
-  container.innerHTML = ''
-
-  const withMessage = (text, noerror = false) => `
-    <div class="${entity}">
-        <div class="${entity}_name">
-          <span class="${noerror ? '' : 'error'}">${text}</span>
-        </div>
-    </div>`
-
-  if (!parameter1) {
-    let message = parameter1EmptyMessage
-    if (!parameter2 && parameter2Name) message += `\r\n${parameter2EmptyMessage}`
-    UpdateContent(container, withMessage(message))
-    return
-  }
-
-  UpdateContent(container, withMessage('Загрузка...', true))
-
-  await fetch(endpoint.replace(`${parameter1Name}`, parameter1).replace(`${parameter2Name}`, parameter2))
-    .then(r => r.json())
-    .then(json => {
-      if (json.success && json.result && Array.isArray(json.result)) {
-        const result = json.result
-        const raw = result.map(e => renderFunction(e, parameter1)).join('')
-        UpdateContent(container, raw)
-      }
-      else if (!json.success) {
-        container.innerHTML = ''
-        UpdateContent(container, withMessage(`Ошибка: ${json.message ? json.message : 'Сервис вернул ошибку без сообщения'}`))
-      }
-      else {
-        UpdateContent(container, withMessage(`Неизвестная ошибка, смотри консоль.`)
-        )
-      }
-    })
-    .catch(error => {
-      console.log(error)
-      alert(`Ошибка запроса: ${error.message}`)
-      UpdateContent(container, withMessage(`Ошибка выполнения запроса: смотри консоль.`)
-      )
-    })
-
-}
-
-function renderLPU(lpu) {
-  const phoneLink = `tel: +7${lpu.phone.replaceAll(/\(|\)|-| /g, '')}`
-  const emailLink = `mailto: ${lpu.email}`
-  // const encodedName = encodeURIComponent(`${x.lpuFullName} ${x.districtName} район`.replaceAll('"', ''))
-  const encodedAddress = lpu.address 
-    ? encodeURIComponent(`${lpu.address} ${lpu.districtName} район`?.replaceAll('"', ''))
-    : ''
-
-  return `
-<div class="lpu">
-  <div class="lpu_name">
-    <span><b>${lpu.lpuFullName}</b></span>
-  </div>
-  <div class="lpu_address">
-    ${lpu.address ? `<a href="https://yandex.ru/maps/2/saint-petersburg/search/${encodedAddress}/?z=19"
-      target="_blank" rel="noreferrer">
-      <span>📍 ${lpu.address}</span>
-    </a>` : ''}
-  </div>
-  <div class="lpu_contacts">
-    <a href=${phoneLink}> 📞 +7 ${lpu.phone}</a>
-    <a href=${emailLink}> 📧 ${lpu.email}</a>
-  </div>
-  <div class="lpu_select">
-    <button class="lpu_select_button" onclick="getSpecialties('${lpu.id}')">Выбрать</button>
-  </div>
-</div>
-  `
-}
-
-async function setActivePatient(insuranceNumber, lastName, firstName, birthDate) {
-  localStorage.setItem(CONSTANTS.selectedPatient, insuranceNumber)
-  const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
-  // selectedPatientNode.innerText = `Выбранный пациент: ${lastName} ${firstName}`
-
-  const request = {
-    view: 'lpus',
-    entity: 'lpu',
-    renderFunction: renderLPU,
-    endpoint: CONSTANTS.API.lpus,
-    parameter1: insuranceNumber,
-    parameter1Name: '{insuranceNumber}',
-    parameter1EmptyMessage: 'Ошибка: не передан полис ОМС пациента',
-    parameter2: '',
-    parameter2Name: '',
-    parameter2EmptyMessage: '',
-  }
-  getData(request)
-}
-
-async function removePatient(insuranceNumber) {
-  debugger
-  const selectedPatient = localStorage.getItem(CONSTANTS.selectedPatient)
-  // if (selectedPatient == insuranceNumber) {
-  //   const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
-  //   selectedPatientNode.innerText = ''
-  // }
-  const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
-  const patient = patients.find(p => p.insuranceNumber == insuranceNumber)
-  patients.splice((patients.indexOf(patient)), 1)
-  localStorage.setItem(CONSTANTS.patients, JSON.stringify(patients))
-
-  // clear
-  renderPatients()
-}
-
-async function onPatientSubmit(event) {
-  event.preventDefault()
-  const form = event.target
-
-  const insuranceNumber = event.target.insuranceNumber.value
-  const lastName = event.target.lastName.value
-  const firstName = event.target.firstName.value
-  const birthDate = event.target.birthDate.value
-
-  setActivePatient(insuranceNumber, lastName, firstName, birthDate)
-
-  const patients = JSON.parse(localStorage.getItem(CONSTANTS.patients) ?? '[]')
-  const existing = patients.find(p => p.insuranceNumber == form.insuranceNumber.value)
-  if (existing) {
-    existing.lastName = form.lastName.value,
-    existing.firstName = form.firstName.value,
-    existing.birthDate = form.birthDate.value
-  }
-  else {
-    patients.push({
-      insuranceNumber: form.insuranceNumber.value,
-      lastName: form.lastName.value,
-      firstName: form.firstName.value,
-      birthDate: form.birthDate.value
-    })
-  }
-  localStorage.setItem(CONSTANTS.patients, JSON.stringify(patients))
-  renderPatients()
-
-  return false
-}
-
-async function getSpecialties(lpuId) {
-
-  const request = {
-    view: 'specialties',
-    entity: 'specialty',
-    renderFunction: renderSpecialty,
-    endpoint: CONSTANTS.API.specialties,
-    parameter1: lpuId,
-    parameter1Name: '{lpuId}',
-    parameter1EmptyMessage: 'Ошибка: не передан идентификатор организации',
-    parameter2: '',
-    parameter2Name: '',
-    parameter2EmptyMessage: '',
-  }
-  getData(request)
-  return
-}
-
-function renderSpecialty(specialty, lpuId) {
-  return `
-<div class="specialty">
-  <div class="specialty_name">${specialty.name}</div>
-  <div class="specialty_tickets">${specialty.countFreeParticipant ? `Талонов: ${specialty.countFreeParticipant}` : ''}</div>
-  <button class="specialty_select_button" onclick="getDoctors('${lpuId}','${specialty.id}')">Выбрать</button>
-</div>`
-}
-
-async function getDoctors(lpuId, specialtyId) {
-  const request = {
-    view: 'doctors',
-    entity: 'doctor',
-    renderFunction: renderDoctor,
-    endpoint: CONSTANTS.API.doctors,
-    parameter1: lpuId,
-    parameter1Name: '{lpuId}',
-    parameter1EmptyMessage: 'Ошибка: не передан идентификатор организации',
-    parameter2: specialtyId,
-    parameter2Name: '{specialtyId}',
-    parameter2EmptyMessage: 'Ошибка: не передан идентификатор врача',
-  }
-  getData(request)
-  return
-}
-
-function renderDoctor(doctor) {
-  return `
-<div class="doctor">
-  <div class="doctor_name">${doctor.name}</div>
-  <div class="doctor_tickets">${doctor.freeParticipantCount ? `Талонов: ${doctor.freeParticipantCount}` : ''}</div>
-  <button class="doctor_select_button" onclick="">Выбрать</button>
-</div>`
-}
-
-const backButtons = Array.from(document.querySelectorAll('.popup_back'))
-for (let i = 0; i < backButtons.length; i++) {
-  const back = backButtons[i];
-  back.addEventListener('click', (e) => {
-    const parentPopup = e.target.closest('.popup')
-    parentPopup.classList.add('hidden')
-  })
-}
-
-function UpdateContent(element, content, position = 'beforeend') {
-  element.innerHTML = ''
-  element.insertAdjacentHTML(position, content)
-}
-
-</script>
+<script type="text/javascript" src="/index.js"></script>
 </html>
