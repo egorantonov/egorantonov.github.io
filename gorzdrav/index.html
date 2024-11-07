@@ -26,20 +26,20 @@
     <div id="newPatient">
       <form id="newPatient_form" onsubmit="return onPatientSubmit(event)">
         <div>
-          <label for="patientFirstName">Имя</label>
-          <input required type="text" id="firstName" />
+          <label for="patientLastName">Фамилия</label>
+          <input required placeholder="Введите фамилию" type="text" id="lastName" />
         </div>
         <div>
-          <label for="patientLastName">Фамилия</label>
-          <input required type="text" id="lastName" />
+          <label for="patientFirstName">Имя</label>
+          <input required placeholder="Введите имя" type="text" id="firstName" />
         </div>
         <div>
           <label for="patientBirthDate">Дата рождения</label>
-          <input required type="date" id="birthDate" />
+          <input required value="1970-08-01" type="date" id="birthDate" />
         </div>
         <div>
           <label for="patientFirstName">Полис ОМС</label>
-          <input required type="number" id="insuranceNumber" />
+          <input required placeholder="Введите номер полиса ОМС (16 символов)" type="number" id="insuranceNumber" min="1000000000000000" max="9999999999999999" />
         </div>
         <div>
           <input type="submit" value="Добавить"/>

@@ -109,6 +109,7 @@ button:hover, input[type="submit"]:hover {
 
 .popup#lpus {
   background-color: #ccc3;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -193,7 +194,7 @@ form {
   display: flex;
   flex-direction: row;
   margin-bottom: 10px;
-  align-items: baseline;
+  align-items: center;
 }
 
 #newPatient_form>div>label {
@@ -201,8 +202,15 @@ form {
 }
 
 #newPatient_form>div>input {
+  min-width: 150px;
   width: 100%;
   height: 32px;
+}
+
+#newPatient_form>div>input:not([type=submit]) {
+  border: 1px solid #777;
+  border-radius: 5px;
+  padding-left: 7px;
 }
 
 #newPatient_form>div>input[type=submit] {
