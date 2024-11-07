@@ -1,28 +1,25 @@
 {
-  "short_name": "Egor Antonov",
-  "name": "Egor Antonov",
+  "short_name": "ГОРЗДРАВ",
+  "name": "ГОРЗДРАВ | Санкт-Петербург",
+  "description": "Сервис записи в поликлиники Санкт-Петербурга по полису ОМС",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "https://gorzdrav.spb.ru/images/r78/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
     }
   ],
   "start_url": "https://egorantonov.github.io/gorzdrav/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#ffffff",
+  "theme_color": "#00AA8A",
   "background_color": "#ffffff",
   "scope": "https://egorantonov.github.io/",
-  "lang": "ru"
+  "lang": "ru",
+  "categories": ["health","medical","government","utilities"],
+  "related_applications": [
+  {
+    "platform": "web"
+  }],
+  "id": "egorantonov"
 }
