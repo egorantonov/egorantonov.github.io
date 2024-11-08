@@ -161,6 +161,10 @@ button:hover, input[type="submit"]:hover {
   cursor: pointer;
 }
 
+.popup_menu.enabled::before {
+  content: '⁝';
+}
+
 .popup_content {
   margin: 48px 10px 0;
   height: calc(100% - 48px);
@@ -300,6 +304,18 @@ form {
 .doctor_name, .doctor_tickets,
 .appointment_room {
   margin-bottom: 10px;
+}
+
+.lpu_name {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.lpu_name>div.removeLpu {
+  cursor: pointer;
+  font-size: 18px;
+  color: #777;
 }
 
 .lpu_select_button,

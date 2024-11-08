@@ -93,13 +93,31 @@ async function getData({
 
   let countPrevious = 0
 
+  const patients = getPatients()
+  const patient = patients.find(p => p.insuranceNumber == getSelectedPatient())
+
+  // Get LPUs from cache
+  if (view == 'lpus' && patient && patient.favLpus && Array.isArray(patient.favLpus) && patient.favLpus.length) {
+    const raw = patient.favLpus.map(e => renderFunction(e, parameter1, parameter2)).join('')
+    UpdateContent(container, raw)
+    return patient.favLpus.length
+  }
+
   const fetchData = async (firstTime = false) => {
     let countCurrent = 0
+
     await fetch(endpoint.replace(`${parameter1Name}`, parameter1).replace(`${parameter2Name}`, parameter2))
       .then(r => r.json())
       .then(json => {
         if (json.success && json.result && Array.isArray(json.result)) {
           const result = json.result
+
+          // caching
+          if (view == 'lpus' && patient && (!patient.favLpus || Array.isArray(patient.favLpus) && !patient.favLpus.length)) {
+            patient.favLpus = result
+            setPatients(patients)
+          }
+
           countCurrent = result.length
           if (firstTime || countCurrent != countPrevious) {
             const raw = result.map(e => renderFunction(e, parameter1, parameter2)).join('')
@@ -140,8 +158,6 @@ async function getData({
   }, 30 * 60 * 1e3) // отменяем опрос через 30 минут
 }
 
-
-
 function renderLPU(lpu) {
   const phoneLink = `tel: +7${lpu.phone.replaceAll(/\(|\)|-| /g, '')}`
   const emailLink = `mailto: ${lpu.email}`
@@ -151,9 +167,10 @@ function renderLPU(lpu) {
     : ''
 
   return `
-<div class="lpu">
+<div class="lpu" id="lpu_${lpu.id}">
   <div class="lpu_name">
-    <span><b>${lpu.lpuFullName}</b></span>
+    <div class="lpu_name_text"><span><b>${lpu.lpuFullName}</b></span></div>
+    <div class="removeLpu" onclick="removeLpu(${lpu.id})">✖</div>
   </div>
   <div class="lpu_address">
     ${lpu.address ? `<a href="https://yandex.ru/maps/2/saint-petersburg/search/${encodedAddress}/?z=19"
@@ -190,6 +207,27 @@ async function setActivePatient(insuranceNumber, lastName, firstName, birthDate)
     parameter2EmptyMessage: '',
   }
   getData(request)
+}
+
+function updateCache() {
+  const patients = getPatients()
+  const insuranceNumber = getSelectedPatient()
+  const patient = patients.find(p => p.insuranceNumber == insuranceNumber)
+  if (patient && patient.favLpus && Array.isArray(patient.favLpus) && patient.favLpus.length) {
+    patient.favLpus = []
+    setPatients(patients)
+    alert('Кэш медорганизаций обновлён')
+    setActivePatient(insuranceNumber)
+  }
+}
+
+function removeLpu(lpuId) {
+  const patients = getPatients()
+  const insuranceNumber = getSelectedPatient()
+  const patient = patients.find(p => p.insuranceNumber == insuranceNumber)
+  patient.favLpus.splice(patient.favLpus.map(lpu => lpu.id).indexOf(lpuId), 1)
+  setPatients(patients)
+  document.getElementById(`lpu_${lpuId}`).remove()
 }
 
 async function removePatient(insuranceNumber) {
