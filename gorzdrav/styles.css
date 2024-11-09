@@ -5,6 +5,12 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+  margin: 0;
+  padding: 8px;
+  border-top:#00AA8A 1.5px solid;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+  box-shadow: #00AA8A 0px -10px 0px 5px;
 }
 
 /* body::selection, 
@@ -34,7 +40,7 @@ button, input[type="submit"] {
   appearance: button;
   border-radius: 6px;
   border: 0px none transparent;
-  height: 32px;
+  height: 40px !important;
   color: #fff;
   background-color: #00AA8A;
   padding-left: 25px;
@@ -74,7 +80,7 @@ button:hover, input[type="submit"]:hover {
 #header h3 {
   text-transform: uppercase;
   color: #009b7e;
-  font-weight: 200;
+  font-weight: 400;
   margin: 0 16px;
 }
 
@@ -107,10 +113,20 @@ button:hover, input[type="submit"]:hover {
   padding: 0px;
 }
 
-.popup#lpus {
-  background-color: #ccc3;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+
+
+@media (min-width: 501px) {
+  .popup#lpus {
+    /* background: #fff; */
+    background: linear-gradient(90deg, #0007, #0003, #0007);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    border-top:#00AA8A 1.5px solid;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    box-shadow: #00AA8A 0px -10px 0px 5px;
+  }
 }
 
 .popup_container {
@@ -132,12 +148,20 @@ button:hover, input[type="submit"]:hover {
   background-color: #fff;
 }
 
-.popup_back {
+@media (max-width: 500px) {
+  .popup_header {
+    border-top:#00AA8A 1.5px solid;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    box-shadow: #00AA8A 0px -10px 0px 5px;
+  }
+}
+
+.popup_back, .popup_menu {
   width: 48px;
   text-align: center;
   cursor: pointer;
   font-size: 24px;
-  /* transform: scale(-1, 1); */
   transform: rotate(180deg);
 }
 
@@ -154,11 +178,8 @@ button:hover, input[type="submit"]:hover {
 }
 
 .popup_menu {
-  width: 48px;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 600;
-  cursor: pointer;
+  font-weight: 900;
+  transform: rotate(90deg);
 }
 
 .popup_menu.enabled::before {
@@ -225,7 +246,7 @@ form {
   width: 100%;
 }
 
-#selectedPatient {
+/* #selectedPatient {
   position: sticky;
   top: 0px;
   width: 100%;
@@ -234,7 +255,7 @@ form {
   padding: 10px 0;
   margin-bottom: 0;
   background: linear-gradient(90deg, #fff, #fffa, #fff);
-}
+} */
 
 .patient {
   display: flex;
@@ -261,6 +282,15 @@ form {
 
 .patient_info:hover {
   background-color: #fafafa;
+}
+
+.patient_name {
+  margin-bottom: 5px;
+}
+
+.patient_birthday, .patient_insurance {
+  color: #777;
+  font-size: 14px;
 }
 
 .patient_remove {
@@ -310,6 +340,7 @@ form {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
+  justify-content: space-between
 }
 
 .lpu_name>div.removeLpu {

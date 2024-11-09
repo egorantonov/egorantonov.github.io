@@ -16,7 +16,7 @@ const CONSTANTS = {
 }
 
 function initialize() {
-  pwa()
+  // pwa()
   renderPatients()
   document.querySelector('#appointments .popup_back').addEventListener('click', () => {
     removeTimers()
@@ -48,8 +48,9 @@ function renderPatient(p) {
   return `<div class="patient" id="patient_${p.insuranceNumber}">
             <div class="patient_info" onclick="setActivePatient('${p.insuranceNumber}','${p.lastName}','${p.firstName}','${p.birthDate}')">
               <div class="patient_info_text">
-                <p>Пациент: ${p.lastName} ${p.firstName} [${p.birthDate}]</p>
-                <p>Полис: ${p.insuranceNumber}</p>
+                <p class="patient_name">Пациент: <b>${p.lastName} ${p.firstName}</b></p>
+                <p class="patient_birthday">Дата рождения: ${new Date(p.birthDate).toLocaleDateString()}</p>
+                <p class="patient_insurance">Полис: ${p.insuranceNumber}</p>
               </div>
             </div>
             <div class="patient_remove" onclick="removePatient('${p.insuranceNumber}')">
@@ -231,7 +232,7 @@ function removeLpu(lpuId) {
 }
 
 async function removePatient(insuranceNumber) {
-  debugger
+  if (!confirm('Вы действительно хотите удалить пациента?')) return
   // const selectedPatient = localStorage.getItem(CONSTANTS.selectedPatient)
   // if (selectedPatient == insuranceNumber) {
   //   const selectedPatientNode = document.getElementById(CONSTANTS.selectedPatient)
@@ -279,7 +280,6 @@ async function onPatientSubmit(event) {
 }
 
 async function getSpecialties(lpuId) {
-    debugger
   const patientId = await getPatientId(lpuId)
   await getLpuAppointments(lpuId, patientId)
 
@@ -349,11 +349,11 @@ async function getLpuAppointments(lpuId, patientId) {
     getData(request)
 }
 
-function renderLpuAppointment(appointment, lpuId, patientId) {
+function renderLpuAppointment(appointment, lpuId) {
     const patient = findSelectedPatient()
     const visit = parseDate(appointment.visitStart)
     return `
-      <div class="lpu_appointment">
+      <div class="lpu_appointment" id="lpuAppointment_${appointment.appointmentId}">
         <div class="lpu_appointment_visit">
           <div class="lpu_appointment_visit_date">${visit.date}</div>
           <div class="lpu_appointment_visit_time">${visit.time}</div>
@@ -370,10 +370,38 @@ function renderLpuAppointment(appointment, lpuId, patientId) {
           <div class="lpu_appointment_patient_birthday">${patient.birthDate}</div>
         </div>
         <div style="padding: 0 10px 10px">
-          <button class="lpu_appointment_cancel_button" onclick="" disabled>Отменить</button>
+          <button class="lpu_appointment_cancel_button" onclick="cancelAppointment(${lpuId}, ${appointment.appointmentId})">Отменить</button>
         </div>
       </div>
     `
+}
+
+async function cancelAppointment(lpuId, appointmentId) {
+  debugger
+  if (!confirm('Вы действительно хотите отказаться от посещения?')) return
+  const patientId = await getPatientId(lpuId)
+  if (!patientId) return
+
+  const payload = {
+      lpuId,
+      patientId,
+      appointmentId,
+      esiaId: null
+  }
+
+  const result = await postData(CONSTANTS.API.cancelAppointment, JSON.stringify(payload))
+  if (result?.success) {
+      alert(`Запись успешно отменена!`)
+      document.getElementById(`lpuAppointment_${appointmentId}`).remove()
+  }
+  else {
+      let message = 'Возникла ошибка при отмене записи!'
+      if (result.message) {
+          message += `\r\b${result.message}`
+      }
+      alert(message)
+      getSpecialties(lpuId)
+  }
 }
 
 async function getAppointments(lpuId, doctorId) {
@@ -418,9 +446,8 @@ async function createAppointment(lpuId, appointmentId, appointmentVisitStart) {
 
     const result = await postData(CONSTANTS.API.createAppointment, JSON.stringify(payload))
     if (result?.success) {
-        // TODO: добавить "Для просмотра записи перейдите в поликлинику"
         removeTimers()
-        alert(`Вы успешно записались на ${visit.time}, ${visit.date}!`)
+        alert(`Вы успешно записались на ${visit.time}, ${visit.date}!\r\nДля просмотра записи перейдите в поликлинику.`)
         location.reload()
     }
     else {
