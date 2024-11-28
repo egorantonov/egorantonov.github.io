@@ -250,8 +250,8 @@ async function onPatientSubmit(event) {
   const form = event.target
 
   const insuranceNumber = event.target.insuranceNumber.value
-  const lastName = event.target.lastName.value
-  const firstName = event.target.firstName.value
+  const lastName = event.target.lastName.value.trim()
+  const firstName = event.target.firstName.value.trim()
   const birthDate = event.target.birthDate.value
 
   setActivePatient(insuranceNumber, lastName, firstName, birthDate)
