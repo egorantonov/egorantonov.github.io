@@ -1,14 +1,21 @@
 <html>
 <head>
   <link rel="preconnect" href="https://gorzdrav.spb.ru">
+  <link rel="preconnect" href="https://mc.webvisor.org">
+  <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="icon" href="https://gorzdrav.spb.ru/images/r78/favicon.ico">
-  <link rel="apple-touch-icon" href="/gorzdrav/256.png" />
-  <link rel="canonical" href="https://egorantonov.github.io/gorzdrav" data-rh="true">
+  <link rel="apple-touch-icon" type="image/png" href="/gorzdrav/256.png" />
+  <link rel="apple-touch-startup-image" type="image/png" href="/gorzdrav/512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="canonical" href="https://egorantonov.github.io/gorzdrav">
   <link rel="manifest" href="/manifest.json" />
   <link rel="stylesheet" href="./styles.min.css">
-  <meta name="og:url" property="og:url" content="https://egorantonov.github.io/gorzdrav" data-rh="true">
-  <meta name="og:title" property="og:title" content="Горздрав" data-rh="true">
-  <meta name="twitter:title" content="Горздрав" data-rh="true">
+  <meta name="og:type" property="og:type" content="website">
+  <meta name="og:url" property="og:url" content="https://egorantonov.github.io/gorzdrav">
+  <meta name="og:title" property="og:title" content="Горздрав" >
+  <meta name="og:description" property="og:description" content="Сервис записи в поликлиники Санкт-Петербурга по полису ОМС">
+  <meta name="og:image" property="og:image" content="./512.png">
+  <meta name="twitter:title" content="Горздрав">
   <meta charset="utf-8"/>
   <title>ГОРЗДРАВ</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -16,7 +23,16 @@
   <meta name="theme-color" content="#00AA8A">
   <meta name="color-scheme" content="light">
 </head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-X0EHDDE0GY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-X0EHDDE0GY');
+</script>
 <body onload="initialize()">
+  <noscript><div><img src="https://mc.webvisor.org/watch/36143495" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
   <div id="root">
     <header id="header">
       <div >
@@ -122,6 +138,7 @@
 
     </div>
   </div>
+<!-- Yandex.Metrika counter --> <script type="text/javascript" > (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)}; m[i].l=1*new Date(); for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }} k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)}) (window, document, "script", "https://mc.webvisor.org/metrika/tag_ww.js", "ym"); ym(36143495, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); </script>
 </body>
 <script type="text/javascript" src="./index.js"></script>
 </html>
