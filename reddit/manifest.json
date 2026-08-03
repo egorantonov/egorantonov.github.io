@@ -1,0 +1,46 @@
+{
+  "short_name": "Reddit",
+  "name": "Reddit JSON Viewver",
+  "description": "Просмотр лент сабреддитов Reddit с помощью Reddit JSON API",
+  "icons": [
+    {
+      "src": "https://gorzdrav.spb.ru/images/r78/favicon.ico",
+      "sizes": "32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }, 
+    {
+      "src": "/gorzdrav/128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/gorzdrav/256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/gorzdrav/512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/gorzdrav/512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "https://egorantonov.github.io/reddit/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#ff4500",
+  "background_color": "#777",
+  "scope": "https://egorantonov.github.io/reddit/",
+  "lang": "ru",
+  "categories": ["social"],
+  "related_applications": [
+  {
+    "platform": "web"
+  }],
+  "id": "egorantonov"
+}
