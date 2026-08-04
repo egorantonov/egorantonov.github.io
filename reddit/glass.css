@@ -76,6 +76,15 @@
   }
 }
 
+header a,
+header input,
+header button {
+    background: var(--bg-header-transparent);
+    backdrop-filter: blur(10px) brightness(1.25) saturate(1.25);
+    color: var(--text-header);
+    border-radius: 100px;
+}
+
 .liquid-glass {
   backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;

@@ -38,14 +38,16 @@ header {
     position: sticky;
     top: 0;
     color: var(--text-header);
-    background: linear-gradient(var(--bg-header-transparent), transparent);
+    /* background: linear-gradient(var(--bg-header-transparent), transparent); */ /* GLASS */
+    /* background: linear-gradient(var(--bg-header), var(--bg-header-transparent)); */
+    background: var(--bg-header);
     padding: 10px;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 8px;
-    /* box-shadow: 0 2px 5px rgba(0, 0, 0, .15); */
-    /* backdrop-filter: blur(10px); */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .15);
+    /* backdrop-filter: blur(5px); */
 }
 
 .header-row {
@@ -85,8 +87,8 @@ button {
 }
 
 #subreddit-download::before {
-    content: '🡫 ';
     color: var(--text-header);
+    content: '↓ ';
 }
 
 #reload,
@@ -97,7 +99,8 @@ button {
 }
 
 input,
-button {
+button,
+header a {
     color: var(--text-post);
     background: var(--bg-post);
     border: none;
@@ -128,9 +131,7 @@ button {
 }
 
 .post h3 {
-
     margin: 8px 0;
-
 }
 
 .self {
@@ -141,19 +142,15 @@ button {
 }
 
 .gallery {
-
     display: flex;
     overflow-x: auto;
     gap: 10px;
     margin-top: 10px;
-
 }
 
 .gallery img {
-
     height: 300px;
     border-radius: 8px;
-
 }
 
 a {
@@ -166,14 +163,15 @@ a:visited {
     color: var(--link-visited);
 }
 
-header a,
+/* GLASS */
+/* header a,
 header input,
 header button {
     background: var(--bg-header-transparent);
     backdrop-filter: blur(10px) brightness(1.25) saturate(1.25);
     color: var(--text-header);
     border-radius: 100px;
-}
+} */
 
 header a,
 header button {
@@ -181,20 +179,16 @@ header button {
 }
 
 video {
-
     height: 300px;
     border-radius: 8px;
-
 }
 
 footer {
-
     padding: 20px;
     text-align: center;
-
 }
 
-span {
+span, footer p {
     overflow-wrap: anywhere;
 }
 

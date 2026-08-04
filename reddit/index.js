@@ -44,7 +44,7 @@ function openJSON() {
 
 function mediaURL(id, meta) {
     if (!meta[id]) return "";
-    return meta[id].s.u.replace(/&amp;/g, "&");
+    return (meta[id].s.gif ?? meta[id].s.u).replace(/&amp;/g, "&");
 }
 
 function createImage(src) {
@@ -89,10 +89,104 @@ function getSelfText(data) {
     }
 }
 
+function getUpvotes(data) {
+    return data.ups > 0 ? `🔼${data.ups} ` : ''
+}
+
+function getComments(data) {
+    return data.num_comments > 0 ? `🗣${data.num_comments} ` : ''
+}
+
+function getDate(data) {
+    return new Date(data.created * 1e3).toLocaleString()
+}
+
+function getRatioBar(data) {
+    const ratio = data.upvote_ratio * 100
+    const ups = document.createElement('div')
+    ups.style.width = `${ratio}%`
+    ups.style.height = '2px'
+    ups.style.backgroundColor = '#0b7'
+    const downs = document.createElement('div')
+    downs.style.width = `${100-ratio}%`
+    downs.style.height = '2px'
+    downs.style.backgroundColor = '#b00'
+    const ratioContainer = document.createElement('div')
+    ratioContainer.style.display = 'flex'
+    ratioContainer.style.maxWidth = '150px'
+    ratioContainer.style.minWidth = '100px'
+    ratioContainer.style.float = 'right'
+    ratioContainer.appendChild(ups)
+    ratioContainer.appendChild(downs)
+
+    return ratioContainer
+}
+
+function getMedia(data) {
+    const gallery = document.createElement("div");
+    gallery.className = "gallery";
+    let has = false;
+    let type = TYPES.NOMEDIA
+
+    if (data.gallery_data && data.media_metadata) {
+        data.gallery_data.items.forEach(i => {
+            // const img = document.createElement("img");
+            // img.src = mediaURL(i.media_id, d.media_metadata);
+            gallery.appendChild(createImageByMeta(i.media_id, data.media_metadata));
+            has = true;
+            type = TYPES.IMAGE
+        });
+
+    }
+
+    else if (data.preview) {
+        if (data.preview.reddit_video_preview) {
+            gallery.appendChild(createVideo(data.preview.reddit_video_preview.fallback_url));
+            has = true
+            type = TYPES.IMAGE
+        }
+
+        else if (data.preview.images.length == 1
+            && data.preview.images[0].source.url.includes('.gif')
+            && data.url.includes('.gif')) {
+            gallery.appendChild(createImage(data.url));
+            has = true;
+            type = TYPES.GIF
+        }
+
+        else {
+            data.preview.images.forEach(i => {
+                gallery.appendChild(createImage(i.source.url))
+                has = true;
+                type = TYPES.IMAGE
+            });
+        }
+    }
+
+    if (data.media && data.media.reddit_video) {
+        gallery.appendChild(createVideo(data.media.reddit_video.fallback_url));
+        has = true;
+        type = TYPES.VIDEO
+    }
+
+    if (!has && data.link_url && data.link_url.includes('i.redd.it')) {
+        gallery.appendChild(createImage(data.link_url));
+        has = true;
+        type = data.link_url.includes('.gif') 
+            ? TYPES.GIF
+            : data.link_url.includes('.mp4') 
+                ? TYPES.VIDEO 
+                : TYPES.IMAGE
+    }
+
+    return {gallery: has ? gallery : false, type}
+}
+
 function render(json) {
     const feed = document.getElementById("feed");
     feed.innerHTML = "";
     const posts = json.data.children;
+    let index = 1;
     posts.forEach(p => {
         const d = p.data;
         const div = document.createElement("div");
@@ -102,7 +196,7 @@ function render(json) {
     <a target="_blank" href="https://www.reddit.com/r/${d.subreddit}.json">
         r/${d.subreddit}
     </a>
-    <span>${new Date(d.created * 1e3).toLocaleString()}</span>
+    <span>${getDate(d)}${getUpvotes(d)}${getComments(d)}</span>
 </div>
 <h3>${d.title || d.link_title || ""}</h3>
 ${getSelfText(d)}
@@ -111,88 +205,39 @@ ${getSelfText(d)}
         <span>u/${d.author}</span>
     </a>
     ${createCount(d.gallery_data?.items?.length)}
-    <span>${d.name}</span>
+    <a target="_blank" class="post-link" href="https://reddit.com${d.permalink}" >
+        ${d.name}#${index}
+    </a>
 </div>
 `;
-
-        const g = document.createElement("div");
-        g.className = "gallery";
-        let has = false;
-        let type = TYPES.NOMEDIA
-
-        if (d.gallery_data && d.media_metadata) {
-            d.gallery_data.items.forEach(i => {
-                // const img = document.createElement("img");
-                // img.src = mediaURL(i.media_id, d.media_metadata);
-                g.appendChild(createImageByMeta(i.media_id, d.media_metadata));
-                has = true;
-                type = TYPES.IMAGE
-            });
-
+        div.appendChild(getRatioBar(d))
+        const media = getMedia(d)
+        if (media?.gallery) {
+            div.appendChild(media.gallery)
         }
 
-        else if (d.preview) {
-            if (d.preview.reddit_video_preview) {
-                g.appendChild(createVideo(d.preview.reddit_video_preview.fallback_url));
-                has = true
-                type = TYPES.IMAGE
-            }
-
-            else if (d.preview.images.length == 1
-                && d.preview.images[0].source.url.includes('.gif')
-                && d.url.includes('.gif')) {
-                g.appendChild(createImage(d.url));
-                has = true;
-                type = TYPES.GIF
-            }
-
-            else {
-                d.preview.images.forEach(i => {
-                    g.appendChild(createImage(i.source.url))
-                    has = true;
-                    type = TYPES.IMAGE
-                });
-            }
-        }
-
-        if (d.media && d.media.reddit_video) {
-            g.appendChild(createVideo(d.media.reddit_video.fallback_url));
-            has = true;
-            type = TYPES.VIDEO
-        }
-
-        if (!has && d.link_url && d.link_url.includes('i.redd.it')) {
-            g.appendChild(createImage(d.link_url));
-            has = true;
-            type = d.link_url.includes('.gif') 
-                ? TYPES.GIF
-                : d.link_url.includes('.mp4') 
-                    ? TYPES.VIDEO 
-                    : TYPES.IMAGE
-        }
-
-        if (has) {
-            div.appendChild(g);
-        }
-
-        div.classList.add(type)
-        if (type == TYPES.NOMEDIA) div.classList.add('hidden') // default filter
+        div.classList.add(media.type)
+        if (media.type == TYPES.NOMEDIA) div.classList.add('hidden') // default filter
         feed.appendChild(div)
-    });
+        index++
+    })
 
     const last = posts[posts.length - 1].data;
+
+
+
     const footer = document.createElement("footer");
     footer.innerHTML = `
 
 <h2>Следующая страница</h2>
 <p>
-    <a target="_blank" href="https://www.reddit.com/r/${last.subreddit}.json?after=${last.name}&limit=100">
-        https://www.reddit.com/r/${last.subreddit}.json?after=${last.name}
+    <a target="_blank" href="https://www.reddit.com/u/${last.author}.json?after=${last.name}&limit=100">
+        /u/${last.author}
     </a>
 </p>
 <p>
-    <a target="_blank" href="https://www.reddit.com/u/${last.author}.json?after=${last.name}&limit=100">
-        https://www.reddit.com/u/${last.author}.json?after=${last.name}
+    <a target="_blank" href="https://www.reddit.com/r/${last.subreddit}.json?after=${last.name}&limit=100">
+        /r/${last.subreddit}
     </a>
 </p>
 `;

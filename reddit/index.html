@@ -10,9 +10,35 @@
 
     <link rel="preconnect" href="https://www.reddit.com">
     <link rel="preconnect" href="https://i.redd.it">
+    <link rel="preconnect" href="https://www.redditstatic.com">
+
     <link rel="stylesheet" href="./styles.css">
-    <link rel="stylesheet" href="./glass.css">
+    <!-- <link rel="stylesheet" href="./glass.css"> -->
+
     <link rel="manifest" href="manifest.json">
+
+    <link rel="icon" href="https://www.redditstatic.com/favicon.ico">
+    <link href="https://www.redditstatic.com/shreddit/assets/favicon/64x64.png" rel="icon shortcut" sizes="64x64">
+    <link href="https://www.redditstatic.com/shreddit/assets/favicon/128x128.png" rel="icon shortcut" sizes="128x128">
+    <link href="https://www.redditstatic.com/shreddit/assets/favicon/192x192.png" rel="icon shortcut" sizes="192x192">
+    <link href="https://www.redditstatic.com/shreddit/assets/favicon/76x76.png" rel="apple-touch-icon" sizes="76x76">
+    <link href="https://www.redditstatic.com/shreddit/assets/favicon/120x120.png" rel="apple-touch-icon" sizes="120x120">
+    <link href="https://www.redditstatic.com/shreddit/assets/favicon/152x152.png" rel="apple-touch-icon" sizes="152x152">
+    <link href="https://www.redditstatic.com/shreddit/assets/favicon/180x180.png" rel="apple-touch-icon" sizes="180x180">
+
+    <meta name="description" content="Reddit JSON Viewer — Просмотр лент сабреддитов Reddit с помощью Reddit JSON API">
+    <meta property="og:image" content="https://avatars.githubusercontent.com/u/16327320?v=4">
+    <meta property="og:site_name" content="Reddit JSON Viewer">
+    <meta property="og:title" content="reddit json viewer">
+    <meta property="og:ttl" content="600">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://egorantonov.github.io/reddit/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/16327320?v=4">
+    <meta name="twitter:site" content="@reddit">
+    <meta name="twitter:title" content="reddit">
+    <link rel="canonical" href="https://egorantonov.github.io/reddit/">
+    <meta name="bingbot" content="noarchive">
 </head>
 
 <body>
@@ -20,24 +46,21 @@
     <header>
         <div class="header-row flex space-between">
             <button class="liquid-glass" id="reload" onclick="location.reload()">
-                ⭮
+                ↻
             </button>
             <input class="liquid-glass" id="subreddit" placeholder="название subreddit">
             <button class="liquid-glass" id="scroll-top"
                 onclick="window.scrollTo({top: 0, left: 0, behavior: 'smooth'})">
-                🡩
+                ↑
             </button>
         </div>
         <div class="header-row flex space-between">
             <a class="liquid-glass" id="subreddit-download" href="#" target="_blank">Скачать subreddit</a>
-            <!-- <button onclick="openJSON()">
-                Скачать JSON
-            </button> -->
             <button class="liquid-glass" id="filter-all" data-type="all">
                 Все
             </button>
             <button class="liquid-glass" id="upload" onclick="picker.click()">
-                ⮍ Загрузить ленту
+                ⤿ Загрузить ленту
             </button>
             <input class="liquid-glass" id="picker" type="file" accept=".json,application/json" hidden>
         </div>
