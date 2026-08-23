@@ -84,6 +84,12 @@ function getSelfText(data) {
     else if (data.selftext) {
         return `<div class="self"><span>${data.selftext}</span></div>`
     }
+    else if (data.body_html) {
+        return `<div class="self"><span>${htmlDecode(data.body_html)}</span></div>`
+    }
+    else if (data.body) {
+        return `<div class="self"><span>${data.body}</span></div>`
+    }
     else {
         return ''
     }
