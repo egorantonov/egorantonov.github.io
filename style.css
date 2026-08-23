@@ -8,6 +8,14 @@
 
 }
 
+@media (prefers-color-scheme: dark) {
+  * {
+    --textcolor: #e1e1e1;
+    --bgcolor: #121212;
+    --highlight: #009b7e;
+  }
+}
+
 /* @media (prefers-color-scheme: dark) {
   * {
     --textcolor: #dadada;
@@ -45,7 +53,7 @@ section:target { /* Show section */
 }
 
 section#home { /* Show #home by default */
-  display: block;
+  /* display: block; */
 }
 
 /* ------- Header ------- */
@@ -63,11 +71,26 @@ header h1 {
   font-size: 1em;
   flex: 1; /* pushes nav to the right */
   white-space: nowrap;
-  padding: 0 5vw .5em 0;
+  padding: 0 5vw 1.5em 0;
+}
+
+nav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 nav a:not(:last-of-type) {
-  margin-right: 1.5vw;
+  /* margin-right: 1.5vw; */
+}
+
+nav a {
+  width: 48%;
+  padding: 10px 14px;
+  background: #7773;
+  border-radius: 100px;
+  font-weight: bold;
 }
 
 /* ------- General ------- */

@@ -193,7 +193,7 @@ function render(json) {
         div.className = "post";
         div.innerHTML += `
 <div class="flex space-between">
-    <a target="_blank" href="https://www.reddit.com/r/${d.subreddit}.json">
+    <a target="_blank" href="https://www.reddit.com/r/${d.subreddit}.json?limit=100">
         r/${d.subreddit}
     </a>
     <span>${getDate(d)}${getUpvotes(d)}${getComments(d)}</span>
@@ -201,7 +201,7 @@ function render(json) {
 <h3>${d.title || d.link_title || ""}</h3>
 ${getSelfText(d)}
 <div class="flex space-between">
-    <a target="_blank" href="https://www.reddit.com/u/${d.author}.json">
+    <a target="_blank" href="https://www.reddit.com/u/${d.author}.json?limit=100">
         <span>u/${d.author}</span>
     </a>
     ${createCount(d.gallery_data?.items?.length)}
