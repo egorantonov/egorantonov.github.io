@@ -374,12 +374,97 @@ function renderLpuAppointment(appointment, lpuId) {
           <div class="lpu_appointment_patient_name">${patient.lastName} ${patient.firstName}</div>
           <div class="lpu_appointment_patient_birthday">${patient.birthDate}</div>
         </div>
-        <div style="padding: 0 10px 10px">
-          <button class="lpu_appointment_cancel_button" onclick="cancelAppointment(${lpuId}, ${appointment.appointmentId})">Отменить</button>
+        <div class="lpu_appointment_buttons">
+          <button class="lpu_appointment_cancel_button" onclick="cancelAppointment(${lpuId}, '${appointment.appointmentId}')">Отменить</button>
+          <button class="lpu_appointment_share" 
+          data-id='${appointment.appointmentId}'
+          data-title='${appointment.specialityRendingConsultation?.name}'
+          data-description='${appointment.lpuFullName}'
+          data-doctor='${appointment.doctorRendingConsultation?.name}'
+          data-doctorspecialty='${appointment.positionRendingConsultation?.name ?? appointment.specialityRendingConsultation?.name}'
+          data-location='${appointment.lpuAddress}'
+          data-start='${appointment.visitStart}' 
+          onclick="shareLink('${appointment.appointmentId}')">В календарь</button>
         </div>
       </div>
     `
 }
+
+function googleCalendarLink({ title, description, location, start, end }) {
+  const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0]+'Z';
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: `${fmt(start)}/${fmt(start)}`,
+    details: description || '',
+    location: location || '',
+  });
+  return `https://calendar.google.com/calendar/render?${params}`;
+}
+
+async function shareLink(id) {
+  const target = document.querySelector(`.lpu_appointment_share[data-id="${id}"]`)
+  const event = target.dataset
+
+  window.open(googleCalendarLink({
+    title: event.title,
+    description: `${event.doctorspecialty} ${event.doctor}\r\n${event.description}`,
+    location: event.location,
+    start: new Date(event.start),
+  }), '_blank');
+}
+
+/*async function share(id) {
+  debugger
+  const target = document.querySelector(`.lpu_appointment_share[data-id="${id}"]`)
+  const event = {
+    title: target.dataset.title,
+    description: target.dataset.description,
+    location: target.dataset.location,
+    start: target.dataset.start,
+  }
+  debugger
+  const blob = createICS(event)
+  const file = new File([blob], 'event.ics', { type: 'text/calendar' })
+
+  if (location.protocol == 'https:' && 'share' in navigator && navigator.canShare && navigator.canShare({ files: [file] })) {
+    await navigator.share({
+      files: [file],
+      title: event.title
+    })
+  }
+  else {
+    downloadICS(blob)
+  }
+}
+
+function createICS({title, description, location, start, end}) {
+  const formatDate = (date) => date.replace(/[-:]/g, '').split('.')[0]+'Z'
+  // const formatDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0]+'Z'
+  const ics  = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'BEGIN:VEVENT',
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${description || ''}`,
+    `LOCATION:${location || ''}`,
+    `DTSTART:${formatDate(start)}`,
+    //`DTEND:${formatDate(end)}`,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n')
+
+  return new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+}
+
+function downloadICS(blob) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = 'url'
+  a.download = 'event.ics'
+  a.click()
+  URL.revokeObjectURL(url)
+}*/
 
 async function cancelAppointment(lpuId, appointmentId) {
   debugger

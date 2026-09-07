@@ -404,11 +404,19 @@ form {
 }
 
 .lpu_select_button,
+.lpu_appointment_share,
 .specialty_select_button,
 .doctor_select_button,
 .appointment_select_button,
 .lpu_appointment_cancel_button {
   width: 100%;
+}
+
+.lpu_appointment_buttons {
+  padding: 0 10px 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 .appointment_select_button {
