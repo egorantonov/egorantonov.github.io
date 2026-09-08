@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Диагностика и нагрузочный тест</title>
+<style>
+  :root{
+    --bg: #0d1117;
+    --panel: #131a24;
+    --line: #223047;
+    --text: #d7e0ec;
+    --dim: #7c8ba1;
+    --accent: #4fd1c5;
+    --accent2: #f2a65a;
+    --danger: #e0616b;
+    --mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
+    --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); min-height:100vh;
+  }
+  body{
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(79,209,197,0.08), transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(242,166,90,0.06), transparent 45%);
+    padding: 32px 20px 80px;
+  }
+  .wrap{ max-width: 920px; margin: 0 auto; }
+
+  header{ margin-bottom: 28px; }
+  header .tag{ font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.02em; }
+  header h1{
+    margin: 6px 0 6px; font-size: 28px; font-weight: 650; letter-spacing: -0.01em;
+  }
+  header p{ margin:0; color: var(--dim); font-size: 14px; max-width: 60ch; line-height:1.5; }
+
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .panel h2{
+    font-size: 13px; margin: 0 0 14px; color: var(--dim); font-weight: 600;
+    display:flex; align-items:center; gap:8px;
+  }
+  .panel h2 .dot{ width:7px; height:7px; border-radius:50%; background: var(--accent); display:inline-block; }
+
+  .diag-grid{
+    display:grid; grid-template-columns: 1fr; gap: 0;
+    font-family: var(--mono); font-size: 13px;
+  }
+  .diag-row{
+    display:grid; grid-template-columns: 180px 1fr; gap: 14px;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .diag-row:last-child{ border-bottom: none; }
+  .diag-row .k{ color: var(--dim); }
+  .diag-row .v{ color: var(--text); word-break: break-word; line-height:1.5; }
+  .v .muted{ color: var(--dim); font-style: italic; }
+  .badge{
+    display:inline-block; padding: 1px 7px; border-radius: 4px;
+    background: rgba(79,209,197,0.12); color: var(--accent); font-size: 11px; margin-left:6px;
+  }
+
+  .controls-grid{ display:flex; flex-direction:column; gap:18px; }
+  .row{ display:flex; flex-wrap:wrap; gap: 22px; align-items:flex-end; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; min-width: 150px; }
+  .field label{ font-size:12px; color: var(--dim); }
+  .field .hint{ font-size:11px; color: var(--dim); }
+
+  .check{
+    display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none;
+    padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px;
+    background: rgba(255,255,255,0.015);
+  }
+  .check input{ width:16px; height:16px; accent-color: var(--accent); cursor:pointer; }
+  .check span.title{ font-size: 14px; font-weight:600; }
+  .check span.desc{ display:block; font-size:11px; color:var(--dim); font-weight:400; margin-top:1px; }
+
+  input[type=number]{
+    background: var(--bg); border: 1px solid var(--line); color: var(--text);
+    border-radius: 6px; padding: 8px 10px; font-family: var(--mono); font-size: 13px; width: 110px;
+  }
+  input[type=range]{ accent-color: var(--accent); width: 180px; }
+  input:focus, button:focus{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .worker-count{ display:flex; align-items:center; gap:10px; }
+  .worker-count output{ font-family: var(--mono); font-size: 13px; min-width: 34px; display:inline-block; }
+
+  .btns{ display:flex; gap:12px; margin-top: 4px; }
+  button{
+    font-family: var(--sans); font-weight:600; font-size: 14px; padding: 11px 22px;
+    border-radius: 7px; border: 1px solid transparent; cursor:pointer; transition: transform .08s ease;
+  }
+  button:active{ transform: scale(0.97); }
+  button#startBtn{ background: var(--accent); color: #06231f; }
+  button#startBtn:disabled{ opacity:0.4; cursor:not-allowed; }
+  button#stopBtn{ background: transparent; color: var(--danger); border-color: var(--danger); }
+  button#stopBtn:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .status{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; margin-top:16px;
+  }
+  .status .cell{
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px;
+  }
+  .status .cell .label{ font-size: 11px; color: var(--dim); margin-bottom:4px; }
+  .status .cell .value{ font-family: var(--mono); font-size: 17px; }
+  .status .cell .value.active{ color: var(--accent); }
+  .status .cell .value.idle{ color: var(--dim); }
+
+  canvas#gpuCanvas{
+    width: 100%; max-width: 320px; height: 140px; border-radius: 8px; border: 1px solid var(--line);
+    background:#000; display:block; margin-top: 14px;
+  }
+
+  footer{ text-align:center; color: var(--dim); font-size: 12px; margin-top: 26px; }
+
+  @media (max-width: 560px){
+    .diag-row{ grid-template-columns: 1fr; }
+    .row{ gap:14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="tag">SYSTEM PROBE</div>
+    <h1>Диагностика устройства и нагрузочный тест</h1>
+    <p>Собирает доступные данные о браузере и оборудовании, затем позволяет создать управляемую нагрузку на CPU (через Web Workers) и/или GPU (через WebGL), с указанием длительности и количества потоков.</p>
+  </header>
+
+  <div class="panel">
+    <h2><span class="dot"></span>Диагностические данные</h2>
+    <div class="diag-grid" id="diagGrid"></div>
+  </div>
+
+  <div class="panel">
+    <h2><span class="dot"></span>Настройка нагрузки</h2>
+    <div class="controls-grid">
+
+      <div class="row">
+        <label class="check">
+          <input type="checkbox" id="cpuCheck" checked>
+          <span>
+            <span class="title">CPU</span>
+            <span class="desc">Web Workers, вычислительный busy-loop</span>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="gpuCheck">
+          <span>
+            <span class="title">GPU</span>
+            <span class="desc">WebGL, фрагментный шейдер каждый кадр</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="workerRange">Потоки CPU (workers)</label>
+          <div class="worker-count">
+            <input type="range" id="workerRange" min="1" max="1" value="1">
+            <output id="workerOut">1</output>
+          </div>
+          <span class="hint" id="workerHint">от 1 до hardwareConcurrency</span>
+        </div>
+
+        <div class="field">
+          <label for="durationInput">Длительность, сек</label>
+          <input type="number" id="durationInput" min="0" value="30">
+          <span class="hint">0 — без ограничения, до нажатия «Стоп»</span>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button id="startBtn">Запустить</button>
+        <button id="stopBtn" disabled>Стоп</button>
+      </div>
+
+      <div class="status">
+        <div class="cell">
+          <div class="label">Состояние</div>
+          <div class="value idle" id="stState">Остановлено</div>
+        </div>
+        <div class="cell">
+          <div class="label">Прошло / осталось</div>
+          <div class="value idle" id="stTime">—</div>
+        </div>
+        <div class="cell">
+          <div class="label">Активные CPU-потоки</div>
+          <div class="value idle" id="stWorkers">0</div>
+        </div>
+        <div class="cell">
+          <div class="label">GPU, FPS</div>
+          <div class="value idle" id="stFps">—</div>
+        </div>
+      </div>
+
+      <canvas id="gpuCanvas" width="320" height="140"></canvas>
+    </div>
+  </div>
+
+  <footer>Все вычисления выполняются локально в браузере. Данные никуда не отправляются.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // polyfills
+  if (!String.prototype.toUpperCaseFirst) {
+    String.prototype.toUpperCaseFirst = function() {
+      return this?.charAt(0)?.toUpperCase() + this?.slice(1) ?? ''
+    }
+  }
+
+  // ---------- DIAGNOSTICS ----------
+  const diagGrid = document.getElementById('diagGrid');
+  const isFirefox = /firefox/i.test(window.navigator.userAgent)
+
+  async function GetWebGpu() {
+    if (!navigator.gpu) {
+      console.log('[webgpu] no gpu')
+      return null
+    }
+
+    const adapter = await navigator.gpu.requestAdapter()
+    if (!adapter) {
+      console.log('[webgpu] no adapter')
+      return null
+    }
+
+    const device = await adapter.requestDevice()
+    if (!device) {
+      console.log('[webgpu] no device')
+    	return null
+    }
+
+    const adapterInfo = device.adapterInfo
+    if (!adapterInfo) {
+      console.log('[webgpu] no adapterInfo')
+    	return null
+    }
+
+    return adapterInfo
+  }
+
+  function addRow(key, value){
+    const row = document.createElement('div');
+    row.className = 'diag-row';
+    const k = document.createElement('div');
+    k.className = 'k'; k.textContent = key;
+    const v = document.createElement('div');
+    v.className = 'v'; v.innerHTML = value;
+    row.appendChild(k); row.appendChild(v);
+    diagGrid.appendChild(row);
+    return v;
+  }
+  const performanceLevel = [
+    'Unknown',
+    'Low',
+    'Medium',
+    'High',
+    'Ultra'
+  ]
+  addRow('User Agent', escapeHtml(navigator.userAgent || 'н/д'));
+
+  // userAgentData (Client Hints), supported in Chromium-based browsers
+  if (navigator.userAgentData){
+    const uad = navigator.userAgentData;
+    const brands = (uad.brands || []).map(b => `${b.brand} ${b.version}`).join(', ');
+    let base = `Mobile: ${uad.mobile ? 'да' : 'нет'} · Platform: ${escapeHtml(uad.platform || 'н/д')}`;
+    base += brands ? `<br>Brands: ${escapeHtml(brands)}` : '';
+    const uadCell = addRow('User Agent Data', base + ' <span class="badge">загрузка…</span>');
+
+    if (uad.getHighEntropyValues){
+      uad.getHighEntropyValues(['platformVersion','architecture','model','bitness','uaFullVersion'])
+        .then(hv => {
+          uadCell.innerHTML = `Mobile: ${uad.mobile ? 'да' : 'нет'} · Platform: ${escapeHtml(uad.platform || 'н/д')}` +
+            (brands ? `<br>Brands: ${escapeHtml(brands)}` : '') +
+            `<br>Version: ${escapeHtml(hv.platformVersion || '—')} · Arch: ${escapeHtml(hv.architecture || '—')} · Bitness: ${escapeHtml(hv.bitness || '—')}` +
+            (hv.model ? `<br>Model: ${escapeHtml(hv.model)}` : '');
+        })
+        .catch(() => { uadCell.innerHTML = base; });
+    } else {
+      uadCell.innerHTML = base;
+    }
+  } else {
+    addRow('User Agent Data', '<span class="muted">API недоступно в этом браузере</span>');
+  }
+
+  const hwConcurrency = navigator.hardwareConcurrency || null;
+  addRow('Hardware Concurrency', hwConcurrency ? `${hwConcurrency} логических ядер` : '<span class="muted">недоступно</span>');
+  addRow('Device Memory', navigator.deviceMemory ? `≈ ${navigator.deviceMemory} ГБ (оценка)` : '<span class="muted">API недоступно (не Chromium / приватность)</span>');
+
+  const gpuCell = addRow('GPU Renderer', getGpuInfoHtml());
+  GetWebGpu().then(adapter => adapter && (gpuCell.innerHTML+=`<br><span style="color:var(--dim)">Architecture: ${adapter?.vendor?.toUpperCaseFirst()} ${adapter?.architecture.toUpperCaseFirst()} ${adapter?.description ?? ''}</span>`))
+
+  if ('cpuPerformance' in navigator) addRow('CPU Performance Level', `${performanceLevel[navigator.cpuPerformance ?? 0]} (${navigator.cpuPerformance})`)
+  const cpuCell = addRow('CPU Performance', '<span class="badge">выполняется тест…</span>');
+  
+  // defer so the page paints before the blocking benchmark runs
+  setTimeout(() => {
+    const score = benchmarkCPU();
+    cpuCell.innerHTML = `${score} тыс. операций/сек <span class="hint" style="color:var(--dim)">(синтетический тест, больше — лучше)</span>`;
+  }, 50);
+
+  function removeGfxApi(renderer, gfxApi) {
+	if (renderer.includes(gfxApi)) {
+		renderer = renderer.slice(0, renderer.indexOf(gfxApi))
+	}
+
+	return renderer.trimEnd()
+}
+
+  function parseGpu(renderer) {
+    const ANGLE = 'ANGLE'
+  	// unwrap Angle renderer
+  	if (renderer.startsWith(ANGLE)) {
+  		renderer = renderer.slice(ANGLE.length + 2, renderer.length - 1)
+  	}
+
+  	renderer = removeGfxApi(renderer, 'Direct')
+  	renderer = removeGfxApi(renderer, 'Open')
+  	renderer = renderer.replace('(TM)', '') // (TM)
+  	renderer = renderer.replace(/\(0x([0-9A-Fa-f]){8}\)/, _ => '') // device id
+
+  	if (renderer[renderer.length - 1] === ',') {
+  		renderer = renderer.slice(0, renderer.length - 1)
+  	}
+
+  	const renderers = renderer.split(',')
+  	if (renderers.length > 1 && renderers[1].includes(renderers[0].trim())) {
+  		renderer = renderers[1].trim()
+  	}
+
+  	return renderer
+  }
+
+  function getGpuInfoHtml(){
+    try{
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return '<span class="muted">WebGL недоступен</span>';
+      const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+      let renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+      console.log(renderer)
+      const gpu = parseGpu(renderer)
+      let vendor = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+      console.log(vendor)
+      if (vendor.indexOf('(')>=0 && vendor.indexOf(')')>0) vendor = vendor.slice(vendor.indexOf('(')+1, vendor.indexOf(')'))
+      const gpuHtml = `${escapeHtml(String(gpu))}${isFirefox ? ' (or similar)' : ''}`
+      const vendorHtml = isFirefox ? '' : `<br><span style="color:var(--dim)">Vendor: ${escapeHtml(String(vendor))}</span>`
+      return `${gpuHtml}${vendorHtml}` ;
+    } catch(e){
+      console.error(e)
+      return '<span class="muted">Не удалось определить</span>';
+    }
+  }
+
+  function benchmarkCPU(){
+    const durationMs = 200;
+    const start = performance.now();
+    let iterations = 0;
+    while (performance.now() - start < durationMs){
+      let x = 0;
+      for (let i = 0; i < 1000; i++){
+        x += Math.sqrt(i) * Math.sin(i);
+      }
+      iterations++;
+    }
+    const opsPerSec = (iterations * 1000) / durationMs / 1000; // in thousands
+    return opsPerSec.toFixed(1);
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ---------- CONTROLS SETUP ----------
+  const workerRange = document.getElementById('workerRange');
+  const workerOut = document.getElementById('workerOut');
+  const workerHint = document.getElementById('workerHint');
+  const maxWorkers = hwConcurrency || 4;
+  workerRange.max = maxWorkers;
+  workerRange.value = maxWorkers;
+  workerOut.textContent = maxWorkers;
+  workerHint.textContent = `от 1 до ${maxWorkers} (hardwareConcurrency${hwConcurrency ? '' : ', оценка — API недоступно'})`;
+  workerRange.addEventListener('input', () => { workerOut.textContent = workerRange.value; });
+
+  const cpuCheck = document.getElementById('cpuCheck');
+  const gpuCheck = document.getElementById('gpuCheck');
+  const durationInput = document.getElementById('durationInput');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+
+  const stState = document.getElementById('stState');
+  const stTime = document.getElementById('stTime');
+  const stWorkers = document.getElementById('stWorkers');
+  const stFps = document.getElementById('stFps');
+
+  // ---------- CPU STRESS (Web Workers) ----------
+  const workerSrc = `
+    let running = false;
+    function loop(){
+      if (!running) return;
+      const start = performance.now();
+      let x = 0;
+      while (performance.now() - start < 15){
+        x += Math.sqrt(Math.random() * 1e6);
+        x = Math.sin(x) * Math.cos(x);
+      }
+      setTimeout(loop, 0);
+    }
+    self.onmessage = function(e){
+      if (e.data === 'start'){ running = true; loop(); }
+      else if (e.data === 'stop'){ running = false; }
+    };
+  `;
+  const workerBlobUrl = URL.createObjectURL(new Blob([workerSrc], {type:'application/javascript'}));
+  let cpuWorkers = [];
+
+  function startCpu(count){
+    stopCpu();
+    for (let i = 0; i < count; i++){
+      const w = new Worker(workerBlobUrl);
+      w.postMessage('start');
+      cpuWorkers.push(w);
+    }
+    stWorkers.textContent = cpuWorkers.length;
+    stWorkers.className = 'value active';
+  }
+
+  function stopCpu(){
+    cpuWorkers.forEach(w => { w.postMessage('stop'); w.terminate(); });
+    cpuWorkers = [];
+    stWorkers.textContent = '0';
+    stWorkers.className = 'value idle';
+  }
+
+  // ---------- GPU STRESS (WebGL) ----------
+  const gpuCanvas = document.getElementById('gpuCanvas');
+  let gl = null;
+  let glProgram = null;
+  let glRafId = null;
+  let glStartTime = 0;
+  let frameCount = 0;
+  let lastFpsTime = 0;
+
+  function initGL(){
+    gl = gpuCanvas.getContext('webgl2') || gpuCanvas.getContext('webgl');
+    if (!gl) return false;
+
+    const vsSrc = `
+      attribute vec2 aPos;
+      void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }
+    `;
+    const fsSrc = `
+      precision highp float;
+      uniform vec2 uRes;
+      uniform float uTime;
+      void main(){
+        vec2 uv = (gl_FragCoord.xy / uRes) * 2.0 - 1.0;
+        vec3 col = vec3(0.0);
+        for (int i = 0; i < 120; i++){
+          float fi = float(i);
+          vec2 p = uv * (1.0 + fi * 0.02);
+          float a = sin(p.x * 10.0 + uTime + fi) * cos(p.y * 10.0 - uTime + fi);
+          col += vec3(0.5 + 0.5 * sin(a + uTime + fi*0.1),
+                      0.5 + 0.5 * cos(a - uTime + fi*0.15),
+                      0.5 + 0.5 * sin(a * 1.3 + fi*0.2));
+        }
+        col /= 120.0;
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    function compile(type, src){
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      return s;
+    }
+    const vs = compile(gl.VERTEX_SHADER, vsSrc);
+    const fs = compile(gl.FRAGMENT_SHADER, fsSrc);
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const quad = new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+    const posLoc = gl.getAttribLocation(prog, 'aPos');
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    glProgram = prog;
+    glProgram.uRes = gl.getUniformLocation(prog, 'uRes');
+    glProgram.uTime = gl.getUniformLocation(prog, 'uTime');
+    return true;
+  }
+
+  function renderGL(ts){
+    if (!glStartTime) glStartTime = ts;
+    const t = (ts - glStartTime) / 1000;
+    gl.viewport(0, 0, gpuCanvas.width, gpuCanvas.height);
+    gl.uniform2f(glProgram.uRes, gpuCanvas.width, gpuCanvas.height);
+    gl.uniform1f(glProgram.uTime, t);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    frameCount++;
+    if (ts - lastFpsTime > 500){
+      const fps = (frameCount * 1000) / (ts - lastFpsTime);
+      stFps.textContent = fps.toFixed(0);
+      stFps.className = 'value active';
+      frameCount = 0;
+      lastFpsTime = ts;
+    }
+    glRafId = requestAnimationFrame(renderGL);
+  }
+
+  function startGpu(){
+    if (!gl && !initGL()){
+      stFps.textContent = 'н/д';
+      stFps.className = 'value idle';
+      return;
+    }
+    glStartTime = 0;
+    lastFpsTime = performance.now();
+    frameCount = 0;
+    glRafId = requestAnimationFrame(renderGL);
+  }
+
+  function stopGpu(){
+    if (glRafId){ cancelAnimationFrame(glRafId); glRafId = null; }
+    stFps.textContent = '—';
+    stFps.className = 'value idle';
+    if (gl){ gl.clear(gl.COLOR_BUFFER_BIT); }
+  }
+
+  // ---------- ORCHESTRATION ----------
+  let elapsedTimerId = null;
+  let autoStopTimerId = null;
+  let runStart = 0;
+  let plannedDuration = 0;
+
+  function updateTimeDisplay(){
+    const elapsedSec = Math.floor((Date.now() - runStart) / 1000);
+    if (plannedDuration > 0){
+      const remaining = Math.max(0, plannedDuration - elapsedSec);
+      stTime.textContent = `${elapsedSec}с / осталось ${remaining}с`;
+    } else {
+      stTime.textContent = `${elapsedSec}с / без ограничения`;
+    }
+  }
+
+  function setRunningUI(running){
+    startBtn.disabled = running;
+    stopBtn.disabled = !running;
+    cpuCheck.disabled = running;
+    gpuCheck.disabled = running;
+    workerRange.disabled = running;
+    durationInput.disabled = running;
+    stState.textContent = running ? 'Выполняется' : 'Остановлено';
+    stState.className = running ? 'value active' : 'value idle';
+    if (!running){
+      stTime.textContent = '—';
+      stTime.className = 'value idle';
+    } else {
+      stTime.className = 'value active';
+    }
+  }
+
+  function start(){
+    const useCpu = cpuCheck.checked;
+    const useGpu = gpuCheck.checked;
+    if (!useCpu && !useGpu){
+      alert('Выберите хотя бы один тип нагрузки: CPU и/или GPU.');
+      return;
+    }
+    plannedDuration = Math.max(0, parseInt(durationInput.value, 10) || 0);
+    runStart = Date.now();
+
+    if (useCpu) startCpu(parseInt(workerRange.value, 10) || 1);
+    if (useGpu) startGpu();
+
+    setRunningUI(true);
+    updateTimeDisplay();
+    elapsedTimerId = setInterval(updateTimeDisplay, 1000);
+
+    if (plannedDuration > 0){
+      autoStopTimerId = setTimeout(stop, plannedDuration * 1000);
+    }
+  }
+
+  function stop(){
+    stopCpu();
+    stopGpu();
+    if (elapsedTimerId){ clearInterval(elapsedTimerId); elapsedTimerId = null; }
+    if (autoStopTimerId){ clearTimeout(autoStopTimerId); autoStopTimerId = null; }
+    setRunningUI(false);
+  }
+
+  startBtn.addEventListener('click', start);
+  stopBtn.addEventListener('click', stop);
+
+  window.addEventListener('beforeunload', stop);
+})();
+</script>
+</body>
+</html>
